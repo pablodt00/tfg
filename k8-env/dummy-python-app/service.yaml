@@ -1,0 +1,11 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: dummy-python-app
+spec:
+  template:
+    spec:
+      containers:
+        - image: dummy-python-app:latest
+          ports:
+            - containerPort: 8080
