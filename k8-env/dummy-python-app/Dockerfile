@@ -1,5 +1,17 @@
+# Imagen base
 FROM python:3.10-slim
+
+# Directorio de trabajo
 WORKDIR /app
-COPY . .
+
+# Copiar archivos
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-CMD ["gunicorn", "-b", ":8080", "app:app"]
+
+COPY . .
+
+# Exponer puerto Flask
+EXPOSE 5000
+
+# Comando de ejecución
+CMD ["python", "app.py"]
