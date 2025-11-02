@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from common.client.endpoints.base_endpoint import BaseCoinGeckoEndpoint
+from common.client.endpoints.ping import PingEndpoint
 from common.client.exceptions import CoinGeckoMissingAPIKeyError, CoinGeckoMissingBaseURLError, CoinGeckoAPIError
 
 logger = logging.getLogger("CoinGeckoClient")
@@ -23,6 +24,7 @@ class CoinGeckoClient:
         self.timeout = settings.COINGECKO_TIMEOUT or 10
         self.base_url = settings.COINGECKO_BASE_URL
         self.session = session
+        self.ping_endpoint = PingEndpoint()
 
     def _headers(self) -> Dict[str, str]:
         return {
@@ -53,3 +55,6 @@ class CoinGeckoClient:
             raise CoinGeckoAPIError(f"Network error: {e}")
         except ValueError:
             raise CoinGeckoAPIError("Invalid response")
+
+    def ping(self):
+        return self._request(self.ping_endpoint)
