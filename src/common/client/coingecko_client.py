@@ -1,10 +1,14 @@
-import requests
 import logging
 from typing import Any, Dict, Optional
+import requests
 
 from common.client.endpoints.base_endpoint import BaseCoinGeckoEndpoint
 from common.client.endpoints.ping import PingEndpoint
-from common.client.exceptions import CoinGeckoMissingAPIKeyError, CoinGeckoMissingBaseURLError, CoinGeckoAPIError
+from common.client.exceptions import (
+    CoinGeckoMissingAPIKeyError,
+    CoinGeckoMissingBaseURLError,
+    CoinGeckoAPIError
+)
 from common.config.settings import Settings
 
 logger = logging.getLogger("CoinGeckoClient")
@@ -19,7 +23,9 @@ class CoinGeckoClient:
             raise CoinGeckoMissingAPIKeyError("A valid API key is needed for CoinGecko")
 
         if not settings.COINGECKO_BASE_URL:
-            raise CoinGeckoMissingBaseURLError("A valid base URL is needed for making requests to CoinGecko")
+            raise CoinGeckoMissingBaseURLError(
+                "A valid base URL is needed for making requests to CoinGecko"
+            )
 
         self.api_key = settings.COINGECKO_API_KEY
         self.timeout = settings.COINGECKO_TIMEOUT or 10
@@ -37,7 +43,7 @@ class CoinGeckoClient:
         url = f"{self.base_url}{endpoint.endpoint_url}"
         headers = self._headers()
         method = endpoint.method
-        logger.info(f"Sending request {method} {url}")
+        logger.info("Sending request %s %s", method, url)
 
         try:
             response = self.session.request(
@@ -48,14 +54,16 @@ class CoinGeckoClient:
             )
             response.raise_for_status()
             return response.json()
-        except requests.exceptions.Timeout:
-            raise CoinGeckoAPIError("CoinGecko timeout exceeded")
-        except requests.exceptions.HTTPError:
-            raise CoinGeckoAPIError(f"HTTP error {response.status_code}: {response.text}")
-        except requests.exceptions.RequestException as e:
-            raise CoinGeckoAPIError(f"Network error: {e}")
-        except ValueError:
-            raise CoinGeckoAPIError("Invalid response")
+        except requests.exceptions.Timeout as exc:
+            raise CoinGeckoAPIError("CoinGecko timeout exceeded") from exc
+        except requests.exceptions.HTTPError as exc:
+            raise CoinGeckoAPIError(
+                f"HTTP error {response.status_code}: {response.text}"
+            ) from exc
+        except requests.exceptions.RequestException as exc:
+            raise CoinGeckoAPIError(f"Network error: {exc}") from exc
+        except ValueError as exc:
+            raise CoinGeckoAPIError("Invalid response") from exc
 
     def ping(self):
         return self._request(self.ping_endpoint)

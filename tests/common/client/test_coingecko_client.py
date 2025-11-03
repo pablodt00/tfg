@@ -10,4 +10,4 @@ class TestCoinGeckoClient(TestCase):
             Settings(),
         )
 
-        assert client._request(client.ping_endpoint) == {'gecko_says': '(V3) To the Moon!'}
+        assert client.ping() == {'gecko_says': '(V3) To the Moon!'}

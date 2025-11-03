@@ -6,3 +6,6 @@ dev-shell:
 
 test:
 	docker run -it -v $$PWD:/srv -w /srv tfg-dev bash -c "PYTHONPATH=src pytest"
+
+pylint:
+	docker run --rm -it -v $$PWD:/srv -w /srv tfg-dev bash -c "PYTHONPATH=src pylint src tests"
