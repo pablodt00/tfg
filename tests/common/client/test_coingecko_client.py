@@ -1,12 +1,13 @@
 from unittest import TestCase
 
-from src.common.client.coingecko_client import CoinGeckoClient
+from common.client.coingecko_client import CoinGeckoClient
+from common.config.settings import Settings
 
 
 class TestCoinGeckoClient(TestCase):
     def test_ping_endpoint(self):
         client = CoinGeckoClient(
-            None,
+            Settings(),
         )
 
-        client._request(client.ping_endpoint)
+        assert client._request(client.ping_endpoint) == {'gecko_says': '(V3) To the Moon!'}

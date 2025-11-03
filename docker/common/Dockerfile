@@ -11,6 +11,7 @@ COPY requirements/requirements-devel.txt ./requirements-devel.txt
 RUN pip install --no-cache-dir -r requirements-devel.txt
 
 COPY src/ ./src/
+COPY tests/ ./tests/
 
 WORKDIR /srv
 

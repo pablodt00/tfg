@@ -13,7 +13,7 @@ class CoinGeckoClient:
     def __init__(
             self,
             settings: Settings,
-            session: Optional[requests.Session] = None
+            session: Optional[requests.Session] = requests.Session()
     ):
         if not settings.COINGECKO_API_KEY:
             raise CoinGeckoMissingAPIKeyError("A valid API key is needed for CoinGecko")
