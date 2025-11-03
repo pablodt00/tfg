@@ -5,13 +5,14 @@ from typing import Any, Dict, Optional
 from common.client.endpoints.base_endpoint import BaseCoinGeckoEndpoint
 from common.client.endpoints.ping import PingEndpoint
 from common.client.exceptions import CoinGeckoMissingAPIKeyError, CoinGeckoMissingBaseURLError, CoinGeckoAPIError
+from common.config.settings import Settings
 
 logger = logging.getLogger("CoinGeckoClient")
 
 class CoinGeckoClient:
     def __init__(
             self,
-            settings: None,
+            settings: Settings,
             session: Optional[requests.Session] = None
     ):
         if not settings.COINGECKO_API_KEY:
