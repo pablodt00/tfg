@@ -2,15 +2,14 @@ name: CI
 
 on:
 push:
-branches: [ master ]
+  branches: [ master ]
 pull_request:
-branches: [ master ]
+  branches: [ master ]
 
 jobs:
 build-and-test:
 runs-on: ubuntu-latest
 
-```
 steps:
   - name: Checkout repository
     uses: actions/checkout@v4
@@ -26,4 +25,3 @@ steps:
 
   - name: Run pylint
     run: make pylint
-```
