@@ -2,3 +2,5 @@ requests
 pydantic-settings
 pytest
 pylint
+httpx
+pytest-asyncio

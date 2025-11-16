@@ -1,6 +1,9 @@
-from common.client.endpoints.base_endpoint import BaseCoinGeckoEndpoint
+from common.client.endpoints.base_endpoint import BaseEndpoint, HTTPMethod
 
 
-class PingEndpoint(BaseCoinGeckoEndpoint):
+class PingEndpoint(BaseEndpoint):
     def __init__(self):
-        super().__init__(endpoint_url="/ping", method="GET")
+        super().__init__(
+            path="/ping",
+            method=HTTPMethod.GET,
+        )
