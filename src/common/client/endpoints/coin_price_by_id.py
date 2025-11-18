@@ -1,10 +1,14 @@
 from common.client.endpoints.base_endpoint import (
     BaseEndpoint,
+    HTTPMethod,
+    QueryParamsModel,
     ResponseModel,
-    HTTPMethod, QueryParamsModel)
+)
+
 
 class CoinPriceByIdResponse(ResponseModel):
     coins: dict
+
 
 class CoinPriceByIdParams(QueryParamsModel):
     vs_currencies: str

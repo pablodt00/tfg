@@ -7,19 +7,19 @@ from pydantic import ValidationError
 
 from common.client.endpoints.base_endpoint import (
     BaseEndpoint,
+    QueryParamsModel,
     RequestModel,
     ResponseModel,
-    QueryParamsModel
 )
 from common.client.endpoints.coin_price_by_id import (
     CoinPriceByIdEndpoint,
-    CoinPriceByIdParams
+    CoinPriceByIdParams,
 )
 from common.client.endpoints.ping import PingEndpoint
 from common.client.exceptions import (
+    CoinGeckoAPIError,
     CoinGeckoMissingAPIKeyError,
     CoinGeckoMissingBaseURLError,
-    CoinGeckoAPIError
 )
 from common.config.settings import Settings
 
@@ -34,9 +34,9 @@ class CoinGeckoEndpoints:
 
 class CoinGeckoClient:
     def __init__(
-            self,
-            settings: Settings,
-            client: Optional[httpx.AsyncClient] = httpx.AsyncClient(),
+        self,
+        settings: Settings,
+        client: Optional[httpx.AsyncClient] = httpx.AsyncClient(),
     ):
         if not settings.COINGECKO_API_KEY:
             raise CoinGeckoMissingAPIKeyError("A valid API key is needed for CoinGecko")
@@ -54,16 +54,13 @@ class CoinGeckoClient:
         self._endpoints = CoinGeckoEndpoints()
 
     def _headers(self) -> Dict[str, str]:
-        return {
-            "Accept": "application/json",
-            "x-cg-demo-api-key": self._api_key
-        }
+        return {"Accept": "application/json", "x-cg-demo-api-key": self._api_key}
 
     async def _request(
-            self,
-            endpoint: BaseEndpoint,
-            body: Optional[RequestModel],
-            query_params: Optional[QueryParamsModel]
+        self,
+        endpoint: BaseEndpoint,
+        body: Optional[RequestModel],
+        query_params: Optional[QueryParamsModel],
     ) -> ResponseModel:
         url = f"{self._base_url}{endpoint.path}"
         if query_params:
@@ -77,7 +74,7 @@ class CoinGeckoClient:
         try:
             response = await self._client.request(
                 method=method,
-                url = url,
+                url=url,
                 headers=headers,
                 timeout=self._timeout,
                 json=request_body,
@@ -106,19 +103,14 @@ class CoinGeckoClient:
 
     async def ping(self):
         return await self._request(
-            self._endpoints.ping_endpoint,
-            body=None,
-            query_params=None
+            self._endpoints.ping_endpoint, body=None, query_params=None
         )
 
-    async def get_coins_price_py_id(
-            self,
-            coin_price_data: CoinPriceByIdParams
-    ):
+    async def get_coins_price_py_id(self, coin_price_data: CoinPriceByIdParams):
         response = await self._request(
             self._endpoints.coin_price_by_id_endpoint,
             body=None,
-            query_params=coin_price_data
+            query_params=coin_price_data,
         )
         return self._endpoints.coin_price_by_id_endpoint.response_model.model_validate(
             response

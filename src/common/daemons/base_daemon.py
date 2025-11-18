@@ -1,7 +1,7 @@
 import signal
 
 
-class BaseDaemon(object):
+class BaseDaemon:
     rerun = True
 
     logger = None
@@ -12,18 +12,16 @@ class BaseDaemon(object):
 
     def stop(self, signum, _):
         self.logger.info(
-            '%s: Stop signal received. Signal: %s.',
-            self.__class__.__name__,
-            signum
+            "%s: Stop signal received. Signal: %s.", self.__class__.__name__, signum
         )
         self.rerun = False
 
     def start(self):
-        self.logger.info('%s: Daemon started.', self.__class__.__name__)
+        self.logger.info("%s: Daemon started.", self.__class__.__name__)
 
         while self.rerun:
 
             self.execute()
 
     def execute(self):
-        raise NotImplementedError('Method execute not overridden')
+        raise NotImplementedError("Method execute not overridden")

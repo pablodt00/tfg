@@ -20,11 +20,12 @@ class CoinGeckoController(ABC):
     def execute(self):
         raise NotImplementedError
 
+
 class CoinGeckoBaseDaemon(BaseDaemon):
     def __init__(
-            self,
-            controller: CoinGeckoController,
-            heartbeat_handler: Callable[[], None],
+        self,
+        controller: CoinGeckoController,
+        heartbeat_handler: Callable[[], None],
     ):
         super().__init__()
         self.controller = controller
@@ -46,7 +47,7 @@ class CoinGeckoBaseDaemon(BaseDaemon):
     def execute(self):
         try:
             self.controller.execute()
-        except BaseException as e: # pylint: disable=broad-exception-caught
+        except BaseException as _:  # pylint: disable=broad-exception-caught
             pass
 
         self.heartbeat()

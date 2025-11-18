@@ -4,3 +4,4 @@ pytest
 pylint
 httpx
 pytest-asyncio
+black

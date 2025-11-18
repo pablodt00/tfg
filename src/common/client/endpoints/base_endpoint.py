@@ -24,6 +24,7 @@ class HTTPMethod:
     PATCH = "PATCH"
     DELETE = "DELETE"
 
+
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
 class BaseEndpoint:

@@ -4,8 +4,8 @@ from gateway.coingecko_service import CoinGeckoAPIService
 
 class CoinGeckoAPIController(CoinGeckoController):
     def __init__(
-            self,
-            service: CoinGeckoAPIService,
+        self,
+        service: CoinGeckoAPIService,
     ):
         self.service = service
         self.started = False

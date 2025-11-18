@@ -1,7 +1,8 @@
 import pytest
 
 from common.client.coingecko_client import CoinGeckoClient
-#from common.client.endpoints.coin_price_by_id import CoinPriceByIdEndpoint
+
+# from common.client.endpoints.coin_price_by_id import CoinPriceByIdEndpoint
 from common.config.settings import Settings
 
 
@@ -11,7 +12,8 @@ async def test_ping_endpoint():
         Settings(),
     )
 
-    assert await client.ping() == {'gecko_says': '(V3) To the Moon!'}
+    assert await client.ping() == {"gecko_says": "(V3) To the Moon!"}
+
 
 # @pytest.mark.asyncio
 # async def test_coin_price_by_id_endpoint():

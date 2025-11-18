@@ -12,3 +12,17 @@ test-pipeline:
 
 pylint:
 	docker run --rm -i -v $$PWD:/srv -w /srv tfg-dev bash -c "PYTHONPATH=src pylint src tests"
+
+isort-fix:
+	docker run --rm -i -v $$PWD:/srv -w /srv tfg-dev bash -c "isort src tests"
+
+black-fix:
+	docker run --rm -i -v $$PWD:/srv -w /srv tfg-dev bash -c "black src tests"
+
+precommit:
+	make isort-fix
+	make black-fix
+	make pylint
+	make test
+
+
