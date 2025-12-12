@@ -5,3 +5,4 @@ pylint
 httpx
 pytest-asyncio
 black
+structlog

@@ -14,16 +14,16 @@ class CoinPrice(SnakeCaseModel):
 
 
 class CoinPriceByIdResponse(ResponseModel):
-    btc: Optional[CoinPrice]
-    eth: Optional[CoinPrice]
-    usdt: Optional[CoinPrice]
-    xrp: Optional[CoinPrice]
-    bnb: Optional[CoinPrice]
-    usdc: Optional[CoinPrice]
-    sol: Optional[CoinPrice]
-    doge: Optional[CoinPrice]
-    ada: Optional[CoinPrice]
-    dot: Optional[CoinPrice]
+    btc: Optional[CoinPrice] = None
+    eth: Optional[CoinPrice] = None
+    usdt: Optional[CoinPrice] = None
+    xrp: Optional[CoinPrice] = None
+    bnb: Optional[CoinPrice] = None
+    usdc: Optional[CoinPrice] = None
+    sol: Optional[CoinPrice] = None
+    doge: Optional[CoinPrice] = None
+    ada: Optional[CoinPrice] = None
+    dot: Optional[CoinPrice] = None
 
 
 class CoinPriceByIdParams(QueryParamsModel):

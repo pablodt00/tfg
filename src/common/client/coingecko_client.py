@@ -1,9 +1,10 @@
-import logging
 from typing import Dict, Optional
 
 import httpx
 import requests
+import structlog
 from pydantic import ValidationError
+from structlog.typing import FilteringBoundLogger
 
 from common.client.endpoints.base_endpoint import (
     BaseEndpoint,
@@ -23,7 +24,7 @@ from common.client.exceptions import (
 )
 from common.config.settings import Settings
 
-logger = logging.getLogger("CoinGeckoClient")
+default_logger = structlog.get_logger()
 
 
 class CoinGeckoEndpoints:
@@ -37,6 +38,7 @@ class CoinGeckoClient:
         self,
         settings: Settings,
         client: Optional[httpx.AsyncClient] = None,
+        logger: FilteringBoundLogger = default_logger,
     ):
         if not settings.COINGECKO_API_KEY:
             raise CoinGeckoMissingAPIKeyError("A valid API key is needed for CoinGecko")
@@ -45,6 +47,8 @@ class CoinGeckoClient:
             raise CoinGeckoMissingBaseURLError(
                 "A valid base URL is needed for making requests to CoinGecko"
             )
+
+        self.logger = logger
 
         self._api_key = settings.COINGECKO_API_KEY
         self._timeout = settings.COINGECKO_TIMEOUT or 10
@@ -77,7 +81,7 @@ class CoinGeckoClient:
         headers = self._headers()
         method = endpoint.method
         request_body = endpoint.build_request_body(body) if body else None
-        logger.info("Sending request %s %s", method, url)
+        self.logger.info("Sending request %s %s", method, url)
 
         try:
             response = await self._client.request(
