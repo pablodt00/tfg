@@ -32,6 +32,7 @@ class CoinGeckoAPIController(CoinGeckoController):
             self.logger.error(
                 "CoinGeckoAPIController: Controller not initialized",
             )
+            return
 
         try:
             asyncio.run(self.service.execute())
