@@ -16,3 +16,6 @@ class Settings(BaseSettings):
     COINGECKO_TIMEOUT: int = Field(
         default=10, description="Timeout for CoinGecko API requests."
     )
+
+    # Heartbeat settings
+    HEARTBEAT_FILE: str = Field(default="/tmp/health-check")
