@@ -1,13 +1,28 @@
+from typing import Optional
+
 from common.client.endpoints.base_endpoint import (
     BaseEndpoint,
     HTTPMethod,
     QueryParamsModel,
-    ResponseModel,
+    ResponseModel, SnakeCaseModel,
 )
 
 
+class CoinPrice(SnakeCaseModel):
+    eur: float
+
+
 class CoinPriceByIdResponse(ResponseModel):
-    coins: dict
+    btc: Optional[CoinPrice]
+    eth: Optional[CoinPrice]
+    usdt: Optional[CoinPrice]
+    xrp: Optional[CoinPrice]
+    bnb: Optional[CoinPrice]
+    usdc: Optional[CoinPrice]
+    sol: Optional[CoinPrice]
+    doge: Optional[CoinPrice]
+    ada: Optional[CoinPrice]
+    dot: Optional[CoinPrice]
 
 
 class CoinPriceByIdParams(QueryParamsModel):

@@ -36,7 +36,7 @@ class CoinGeckoClient:
     def __init__(
         self,
         settings: Settings,
-        client: Optional[httpx.AsyncClient] = httpx.AsyncClient(),
+        client: Optional[httpx.AsyncClient] = None,
     ):
         if not settings.COINGECKO_API_KEY:
             raise CoinGeckoMissingAPIKeyError("A valid API key is needed for CoinGecko")
@@ -49,9 +49,17 @@ class CoinGeckoClient:
         self._api_key = settings.COINGECKO_API_KEY
         self._timeout = settings.COINGECKO_TIMEOUT or 10
         self._base_url = settings.COINGECKO_BASE_URL
-        self._client = client
+        self._client = client if client else httpx.AsyncClient()
+        self._should_close_client = client is None
 
         self._endpoints = CoinGeckoEndpoints()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self._should_close_client:
+            await self._client.aclose()
 
     def _headers(self) -> Dict[str, str]:
         return {"Accept": "application/json", "x-cg-demo-api-key": self._api_key}
@@ -84,6 +92,8 @@ class CoinGeckoClient:
             response_data = response.json()
             if endpoint.response_model:
                 try:
+                    print("TESTING")
+                    print(response_data)
                     validated_response = endpoint.response_model(**response_data)
                     return validated_response.model_dump()
                 except ValidationError as e:
