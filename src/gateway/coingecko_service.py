@@ -12,4 +12,12 @@ class CoinGeckoAPIService:
     def signal_to_stop_execution(self):
         self.must_stop = True
 
-    # Implement calls
+    def process_data(self):
+        try:
+            pass
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    def execute(self):
+        if self.must_stop:
+            pass
