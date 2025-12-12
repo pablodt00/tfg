@@ -7,7 +7,6 @@ from gateway.coingecko_service import CoinGeckoAPIService
 
 
 def test_start():
-    """Tests that the controller's started flag is set correctly."""
     service = MagicMock(spec=CoinGeckoAPIService)
     logger = MagicMock(spec=FilteringBoundLogger)
     controller = CoinGeckoAPIController(service, logger)
@@ -18,7 +17,6 @@ def test_start():
 
 
 def test_stop():
-    """Tests that the stop signal is correctly sent to the service."""
     service = MagicMock(spec=CoinGeckoAPIService)
     logger = MagicMock(spec=FilteringBoundLogger)
     controller = CoinGeckoAPIController(service, logger)
@@ -29,7 +27,6 @@ def test_stop():
 
 
 def test_execute_when_not_started():
-    """Tests that an error is logged if execute is called before start."""
     service = MagicMock(spec=CoinGeckoAPIService)
     logger = MagicMock(spec=FilteringBoundLogger)
     controller = CoinGeckoAPIController(service, logger)
@@ -43,7 +40,6 @@ def test_execute_when_not_started():
 
 
 def test_execute():
-    """Tests the successful execution flow."""
     service = MagicMock(spec=CoinGeckoAPIService)
     service.execute = AsyncMock()
     logger = MagicMock(spec=FilteringBoundLogger)
@@ -58,7 +54,6 @@ def test_execute():
 
 
 def test_execute_with_runtime_error():
-    """Tests that a RuntimeError during service execution is caught and logged."""
     service = MagicMock(spec=CoinGeckoAPIService)
     service.execute = AsyncMock()
     logger = MagicMock(spec=FilteringBoundLogger)
