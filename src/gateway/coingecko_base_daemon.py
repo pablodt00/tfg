@@ -63,6 +63,7 @@ class CoinGeckoBaseDaemon(BaseDaemon):
         self.heartbeat_handler()
 
     def execute(self):
+        self.logger.info("CoinGeckoBaseDaemon: Executing task")
         try:
             self.controller.execute()
         except BaseException as _:  # pylint: disable=broad-exception-caught
