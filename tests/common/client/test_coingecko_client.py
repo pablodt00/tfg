@@ -1,20 +1,14 @@
+# pylint: disable=redefined-outer-name
 import pytest
 
 from common.client.coingecko_client import CoinGeckoClient
-from common.client.endpoints.coin_price_by_id import CoinPriceByIdParams, CoinPriceByIdEndpoint
+from common.client.endpoints.coin_price_by_id import CoinPriceByIdEndpoint
 from common.config.settings import Settings
 
 
-@pytest.fixture(scope="module")
-def settings():
-    return Settings()
-
 @pytest.fixture
-def coingecko_client(settings):
-    # Ensure API key and base URL are loaded from environment for integration tests
-    if not settings.COINGECKO_API_KEY or not settings.COINGECKO_BASE_URL:
-        pytest.skip("COINGECKO_API_KEY and COINGECKO_BASE_URL must be set for integration tests")
-    return CoinGeckoClient(settings=settings)
+def coingecko_client():
+    return CoinGeckoClient(settings=Settings())
 
 
 @pytest.mark.asyncio

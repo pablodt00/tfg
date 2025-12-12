@@ -4,7 +4,8 @@ from common.client.endpoints.base_endpoint import (
     BaseEndpoint,
     HTTPMethod,
     QueryParamsModel,
-    ResponseModel, SnakeCaseModel,
+    ResponseModel,
+    SnakeCaseModel,
 )
 
 
