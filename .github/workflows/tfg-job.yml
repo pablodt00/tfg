@@ -16,10 +16,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Install dependencies
+      - name: Install Docker Compose
         run: |
-          pip install docker-compose
-          pip install pylint isort
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Install linters
+        run: pip install pylint isort
 
       - name: Build tfg image
         run: make build
