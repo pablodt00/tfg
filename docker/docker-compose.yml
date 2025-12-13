@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  application:
+    image: tfg
+    env_file:
+      - local.env
+    environment:
+      - PYTHONPATH=/srv/app/src
+    volumes:
+      - "../:/srv/app:delegated"
+    networks:
+      - service
+    stdin_open: true
+    tty: true
+
+
+  daemon:
+    extends:
+      service: application
+    networks:
+      - service
+
+  coingecko-api-daemon:
+    extends:
+        service: daemon
+    entrypoint: "/srv/app/scripts/coingecko_api_daemon.sh"
+
+  shell:
+    extends:
+      service: application
+    entrypoint: ["bash"]
+
+networks:
+  service: {}

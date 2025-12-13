@@ -6,12 +6,13 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc build-essential libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/requirements-devel.txt ./requirements-devel.txt
+COPY requirements/requirements.txt ./requirements.txt
 
-RUN pip install --no-cache-dir -r requirements-devel.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
 COPY tests/ ./tests/
+COPY scripts/ ./scripts/
 
 WORKDIR /srv
 

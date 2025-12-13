@@ -12,13 +12,11 @@ class CoinGeckoAPIService:
     def __init__(
         self,
         settings: Settings,
-        coingecko_client: CoinGeckoClient,
         logger: FilteringBoundLogger = default_logger,
     ):
         self.settings = settings
         self.logger = logger
         self.must_stop = False
-        self.client = coingecko_client
 
     def signal_to_stop_execution(self):
         self.must_stop = True
@@ -37,13 +35,15 @@ class CoinGeckoAPIService:
             "CoinGeckoAPIService: Calling CoinGecko API",
         )
         try:
-            coin_price_data = await self.client.get_coins_price_py_id(
-                coin_price_data=CoinPriceByIdEndpoint.get_default_request(),
-            )
-            self.logger.info(
-                "CoinGeckoAPIService: Successfully retrieved data from CoinGecko API",
-                data=coin_price_data,
-            )
+            async with CoinGeckoClient(settings=self.settings) as client:
+                coin_price_data = await client.get_coins_price_py_id(
+                    coin_price_data=CoinPriceByIdEndpoint.get_default_request(),
+                )
+                self.logger.info(
+                    "CoinGeckoAPIService: "
+                    "Successfully retrieved data from CoinGecko API",
+                    data=coin_price_data,
+                )
         except Exception:
             self.logger.exception(
                 "CoinGeckoAPIService: Error calling CoinGecko API",

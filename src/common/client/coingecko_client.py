@@ -96,8 +96,6 @@ class CoinGeckoClient:
             response_data = response.json()
             if endpoint.response_model:
                 try:
-                    print("TESTING")
-                    print(response_data)
                     validated_response = endpoint.response_model(**response_data)
                     return validated_response.model_dump()
                 except ValidationError as e:
