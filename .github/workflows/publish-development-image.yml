@@ -22,10 +22,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Development Docker image
-        run: make build-dev
+        run: make build
 
       - name: Tag and Push image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/tfg-dev
-          docker tag tfg-dev:latest $IMAGE_NAME:latest
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/tfg
+          docker tag tfg:latest $IMAGE_NAME:latest
           docker push $IMAGE_NAME:latest
