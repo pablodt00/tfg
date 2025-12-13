@@ -17,10 +17,7 @@ logs:
 	${DC} logs -f
 
 test:
-	docker run -it -v $$PWD:/srv -w /srv tfg bash -c "PYTHONPATH=src pytest"
-
-test-pipeline:
-	docker run -i -v $$PWD:/srv -w /srv tfg bash -c "PYTHONPATH=src pytest"
+	${DC} run --rm test
 
 pylint:
 	docker run --rm -i -v $$PWD:/srv -w /srv tfg bash -c "PYTHONPATH=src pylint src tests"
@@ -42,3 +39,7 @@ application:
 
 coingecko-api-daemon:
 	${DC} up -d coingecko-api-daemon
+
+clean-pycache:
+	find . -type d -name "__pycache__" -exec rm -r {} +
+	find . -type f -name "*.pyc" -delete

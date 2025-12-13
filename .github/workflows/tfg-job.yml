@@ -20,7 +20,7 @@ jobs:
         run: make build
 
       - name: Run pytest
-        run: make test-pipeline
+        run: make test
 
       - name: Run pylint
         run: make pylint

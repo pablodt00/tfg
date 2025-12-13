@@ -31,5 +31,13 @@ services:
       service: application
     entrypoint: ["bash"]
 
+  test:
+    extends:
+      service: application
+    working_dir: /srv/app
+    entrypoint: ["pytest"]
+    env_file:
+      - local.env
+
 networks:
   service: {}
