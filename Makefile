@@ -40,6 +40,26 @@ application:
 coingecko-api-daemon:
 	${DC} up -d coingecko-api-daemon
 
+kafka:
+	${DC} up -d kafka
+
+kafka-topics:
+	${DC} exec kafka kafka-topics --list --bootstrap-server kafka:9092
+
+kafka-create-topic:
+	@if [ -z "${TOPIC}" ]; then \
+		echo "Please provide a topic name. Usage: make kafka-create-topic TOPIC=<topic-name>"; \
+		exit 1; \
+	fi
+	${DC} exec kafka kafka-topics --create --topic ${TOPIC} --partitions 1 --replication-factor 1 --bootstrap-server kafka:9092
+
+kafka-inspect-topic:
+	@if [ -z "${TOPIC}" ]; then \
+		echo "Please provide a topic name. Usage: make kafka-consume-topic TOPIC=<topic-name>"; \
+		exit 1; \
+	fi
+	${DC} exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic ${TOPIC} --from-beginning --timeout-ms 2000
+
 clean-pycache:
 	find . -type d -name "__pycache__" -exec rm -r {} +
 	find . -type f -name "*.pyc" -delete
