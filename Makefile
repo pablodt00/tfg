@@ -64,7 +64,7 @@ kafka-create-topic:
 
 kafka-inspect-topic:
 	@if [ -z "${TOPIC}" ]; then \
-		echo "Please provide a topic name. Usage: make kafka-consume-topic TOPIC=<topic-name>"; \
+		echo "Please provide a topic name. Usage: make kafka-inspect-topic TOPIC=<topic-name>"; \
 		exit 1; \
 	fi
 	${DC} exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic ${TOPIC} --from-beginning

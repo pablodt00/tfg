@@ -13,8 +13,6 @@ services:
     image: confluentinc/cp-kafka:7.3.0
     depends_on:
       - zookeeper
-    ports:
-      - "9092:29092"
     networks:
       - service
     environment:
@@ -65,6 +63,13 @@ services:
     entrypoint: ["pytest"]
     env_file:
       - local.env
+
+  processor-daemon:
+    extends:
+      service: daemon
+    depends_on:
+      - kafka
+    entrypoint: "/srv/app/scripts/processor_daemon.sh"
 
 networks:
   service: {}

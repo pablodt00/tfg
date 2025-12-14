@@ -24,3 +24,6 @@ class Settings(BaseSettings):
     KAFKA_BOOTSTRAP_SERVERS: str = Field(alias="KAFKA_BOOTSTRAP_SERVERS")
 
     COINGECKO_KAFKA_TOPIC: str = Field(alias="COINGECKO_KAFKA_TOPIC")
+
+    # Consumers
+    CONSUMER_GROUP_ID: str = Field(alias="CONSUMER_GROUP_ID")
