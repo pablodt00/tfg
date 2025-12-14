@@ -14,7 +14,14 @@ clean:
 	${DC} down --remove-orphans
 
 logs:
-	${DC} logs -f
+	@if [ -z "${SERVICE}" ]; then \
+		echo "Tailing logs for all services. Usage: make logs SERVICE=<service-name>"; \
+		${DC} logs -f; \
+	else \
+		echo "Tailing logs for service: ${SERVICE}"; \
+		${DC} logs -f ${SERVICE}; \
+	fi
+
 
 test:
 	${DC} run --rm test
@@ -42,6 +49,8 @@ coingecko-api-daemon:
 
 kafka:
 	${DC} up -d kafka
+	make kafka-create-topic TOPIC=coingecko-prices.updates
+	make kafka-topics
 
 kafka-topics:
 	${DC} exec kafka kafka-topics --list --bootstrap-server kafka:9092
@@ -58,7 +67,7 @@ kafka-inspect-topic:
 		echo "Please provide a topic name. Usage: make kafka-consume-topic TOPIC=<topic-name>"; \
 		exit 1; \
 	fi
-	${DC} exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic ${TOPIC} --from-beginning --timeout-ms 2000
+	${DC} exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic ${TOPIC} --from-beginning
 
 clean-pycache:
 	find . -type d -name "__pycache__" -exec rm -r {} +

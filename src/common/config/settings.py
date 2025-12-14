@@ -19,3 +19,8 @@ class Settings(BaseSettings):
 
     # Heartbeat settings
     HEARTBEAT_FILE: str = Field(alias="HEARTBEAT_FILE")
+
+    # Kafka
+    KAFKA_BOOTSTRAP_SERVERS: str = Field(alias="KAFKA_BOOTSTRAP_SERVERS")
+
+    COINGECKO_KAFKA_TOPIC: str = Field(alias="COINGECKO_KAFKA_TOPIC")
