@@ -43,6 +43,7 @@ precommit:
 
 application:
 	make coingecko-api-daemon
+	make processor-daemon
 
 coingecko-api-daemon:
 	${DC} up -d coingecko-api-daemon
@@ -72,3 +73,6 @@ kafka-inspect-topic:
 clean-pycache:
 	find . -type d -name "__pycache__" -exec rm -r {} +
 	find . -type f -name "*.pyc" -delete
+
+processor-daemon:
+	${DC} up -d processor-daemon
