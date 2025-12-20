@@ -18,13 +18,15 @@ class Alert(ORMBaseSchema):
     id: int | None = None
     coin: str
     condition: AlertConditionEnum
+    amount: float
     user_email: str
     created_at: datetime = Field(default_factory=datetime.now)
 
     @classmethod
-    def from_alert(cls, coin: str, condition: AlertConditionEnum, user_email: str):
+    def from_alert(cls, coin: str, condition: AlertConditionEnum, user_email: str, amount: float):
         return cls(
             coin=coin,
             condition=condition,
             user_email=user_email,
+            amount=amount,
         )
