@@ -7,3 +7,6 @@ pytest-asyncio
 black
 structlog
 confluent-kafka
+sqlalchemy
+alembic
+asyncpg

@@ -71,5 +71,65 @@ services:
       - kafka
     entrypoint: "/srv/app/scripts/processor_daemon.sh"
 
+  tfg-db:
+    image: postgres:15-alpine
+    volumes:
+      - "postgres-volume:/var/lib/postgresql/data"
+    env_file:
+      - ./local.env
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - service
+
+  tfg-db-shell:
+    image: postgres:15-alpine
+    env_file:
+      - ./local.env
+    entrypoint: [
+      "psql",
+      "-h", "tfg-db",
+      "-U", "tfg_user",
+      "-d", "tfg_db"
+    ]
+    depends_on:
+      - tfg-db
+    networks:
+      - service
+    stdin_open: true
+    tty: true
+
+  clear-tfg-db:
+    image: postgres:15-alpine
+    env_file:
+      - ./local.env
+    entrypoint: [
+      "psql",
+      "-h", "tfg-db",
+      "-U", "tfg_user",
+      "-d", "tfg_db",
+      "-c", "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
+    ]
+    depends_on:
+      - tfg-db
+    networks:
+      - service
+
+  alembic:
+    extends:
+      service: application
+    entrypoint: [
+      "tfg-db:5432",
+      "alembic"
+    ]
+    depends_on:
+      - tfg-db
+    env_file:
+      - ./local.env
+
+volumes:
+   postgres-volume:
+
 networks:
   service: {}

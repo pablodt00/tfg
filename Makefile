@@ -76,3 +76,14 @@ clean-pycache:
 
 processor-daemon:
 	${DC} up -d processor-daemon
+
+run-db:
+	${DC} up -d tfg-db
+
+db-shell:
+	${DC} run --rm tfg-db-shell
+
+clear-db:
+	${DC} run --rm clear-tfg-db
+
+	# ${DC} run --rm alembic -c src/database/alembic/alembic.ini upgrade head
