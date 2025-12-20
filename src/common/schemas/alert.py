@@ -13,8 +13,9 @@ class AlertConditionEnum(str, Enum):
     def __str__(self) -> str:
         return self.value
 
+
 class Alert(ORMBaseSchema):
-    id : int | None = None
+    id: int | None = None
     coin: str
     condition: AlertConditionEnum
     user_email: str
