@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, Generic
+from typing import Generic, Type, TypeVar
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +11,7 @@ class RecordNotFound(Exception):
     pass
 
 
-T = TypeVar('T', bound=ORMBaseSchema)
+T = TypeVar("T", bound=ORMBaseSchema)
 
 
 class CrudRepository(Generic[T]):

@@ -1,11 +1,7 @@
 from collections.abc import Callable
 from typing import TypeAlias
 
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 SessionFactory: TypeAlias = Callable[[], AsyncSession]
