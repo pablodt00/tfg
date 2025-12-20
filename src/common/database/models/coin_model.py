@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Float, Integer, String, UniqueConstraint
 
-from common.database.models import ORMBaseModel
+from common.database.models.base import ORMBaseModel
 
 
 class CoinModel(ORMBaseModel):

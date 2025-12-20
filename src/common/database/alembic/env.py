@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 import asyncio
 from logging.config import fileConfig
 
