@@ -119,14 +119,17 @@ services:
   alembic:
     extends:
       service: application
-    entrypoint: [
-      "tfg-db:5432",
-      "alembic"
-    ]
+    entrypoint: [ "alembic" ]
+    command: [ "-c", "src/common/database/alembic/alembic.ini", "upgrade", "head" ]
     depends_on:
       - tfg-db
     env_file:
       - ./local.env
+    networks:
+      - service
+    volumes:
+      - ../src/common/database/alembic/versions:/srv/src/common/database/alembic/versions
+
 
 volumes:
    postgres-volume:

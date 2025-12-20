@@ -86,4 +86,15 @@ db-shell:
 clear-db:
 	${DC} run --rm clear-tfg-db
 
-	# ${DC} run --rm alembic -c src/database/alembic/alembic.ini upgrade head
+	${DC} run --rm alembic -c src/common/database/alembic/alembic.ini upgrade head
+
+create-migration:
+	@if [ -z "${MSG}" ]; then \
+		echo "Please provide a migration message. Usage: make create-migration MSG=\"your message\""; \
+		exit 1; \
+	fi
+	${DC} run --rm alembic -c src/common/database/alembic/alembic.ini revision --autogenerate -m "${MSG}"
+
+migrate:
+	${DC} run --rm alembic -c src/common/database/alembic/alembic.ini upgrade head
+

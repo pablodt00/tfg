@@ -27,3 +27,18 @@ class Settings(BaseSettings):
 
     # Consumers
     CONSUMER_GROUP_ID: str = Field(alias="CONSUMER_GROUP_ID")
+
+    # Database
+    DB_HOST: str = Field(alias="DB_HOST")
+
+    DB_PORT: int = Field(alias="DB_PORT", default=5432)
+
+    DB_USER: str = Field(alias="DB_USER")
+
+    DB_PASSWORD: str = Field(alias="DB_PASSWORD")
+
+    DB_NAME: str = Field(alias="DB_NAME")
+
+    @property
+    def db_uri_as_string(self) -> str:
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
