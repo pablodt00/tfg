@@ -48,6 +48,9 @@ application:
 coingecko-api-daemon:
 	${DC} up -d coingecko-api-daemon
 
+api-daemon:
+	${DC} up -d api-daemon
+
 kafka:
 	${DC} up -d kafka
 	make kafka-create-topic TOPIC=coingecko-prices.updates

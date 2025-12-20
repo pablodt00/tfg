@@ -130,6 +130,12 @@ services:
     volumes:
       - ../src/common/database/alembic/versions:/srv/src/common/database/alembic/versions
 
+  api-daemon:
+    extends:
+      service: application
+    entrypoint: [ "/srv/app/scripts/api_daemon.sh" ]
+    ports:
+      - "8000:8000"
 
 volumes:
    postgres-volume:

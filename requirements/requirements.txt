@@ -10,3 +10,5 @@ confluent-kafka
 sqlalchemy
 alembic
 asyncpg
+uvicorn
+fastapi
