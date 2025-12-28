@@ -23,7 +23,9 @@ class Alert(ORMBaseSchema):
     created_at: datetime = Field(default_factory=datetime.now)
 
     @classmethod
-    def from_alert(cls, coin: str, condition: AlertConditionEnum, user_email: str, amount: float):
+    def from_alert(
+        cls, coin: str, condition: AlertConditionEnum, user_email: str, amount: float
+    ):
         return cls(
             coin=coin,
             condition=condition,

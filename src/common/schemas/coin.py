@@ -1,8 +1,25 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import Field
 
 from common.schemas.base import ORMBaseSchema
+
+
+class CoinEnum(str, Enum):
+    BTC = "btc"
+    ETH = "eth"
+    USDT = "usdt"
+    BNB = "bnb"
+    XRP = "xrp"
+    SOL = "sol"
+    USDC = "usdc"
+    DOGE = "doge"
+    ADA = "ada"
+    DOT = "dot"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class Coin(ORMBaseSchema):

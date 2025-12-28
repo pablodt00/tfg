@@ -5,7 +5,7 @@ from api.endpoints import alerts, coins, health
 
 
 def build_api(
-    api_service=APIService,
+    api_service: APIService,
 ):
     app = FastAPI(
         redoc_url="/",
@@ -21,13 +21,17 @@ def build_api(
     )
 
     app.include_router(
-        alerts.make_alerts_router(),
+        alerts.make_alerts_router(
+            api_service=api_service,
+        ),
         prefix="/alerts",
         tags=["Alerts"],
     )
 
     app.include_router(
-        coins.make_coins_router(),
+        coins.make_coins_router(
+            api_service=api_service,
+        ),
         prefix="/coins",
         tags=["Coins"],
     )

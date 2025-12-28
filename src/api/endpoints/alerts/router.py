@@ -1,15 +1,47 @@
+from http import HTTPStatus
+from http.client import HTTPException
+
 from fastapi import APIRouter
 
+from api.api_service import APIService
+from common.client.endpoints.base_endpoint import RequestModel
+from common.schemas.alert import AlertConditionEnum
+from common.schemas.coin import CoinEnum
 
-def make_alerts_router() -> APIRouter:
+
+class NewAlertRequestModel(RequestModel):
+    coin: CoinEnum
+    amount: float
+    email: str
+    condition: AlertConditionEnum
+
+
+def make_alerts_router(
+    api_service: APIService,
+) -> APIRouter:
     router = APIRouter()
 
-    @router.get(
-        "/alerts",
-        summary="Return a pong health check",
-        description="Return a pong health check",
+    @router.post(
+        "/add",
+        summary="Add a new alert for a user",
+        description="Add a new alert for a user",
+        status_code=HTTPStatus.CREATED,
     )
-    async def ping():
-        return {"ping": "pong"}
+    async def new_alert(
+        request: NewAlertRequestModel,
+    ):
+        try:
+            alert = await api_service.add_alert(
+                email=request.email,
+                coin=request.coin,
+                amount=request.amount,
+                condition=request.condition,
+            )
+            return alert
+        except Exception as e:
+            raise HTTPException(
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+                f"Failed to create alert: {e}",
+            ) from e
 
     return router

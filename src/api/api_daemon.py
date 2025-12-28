@@ -1,12 +1,32 @@
 from api.api_service import APIService
 from api.endpoints.app import build_api
 from common.config.settings import Settings
+from common.database import make_engine, make_session_factory
+from common.database.repositories.alert_repository import AlertRepository
+from common.database.repositories.coin_repository import CoinRepository
 
 
 def execute():
     settings = Settings()
 
-    api_service = APIService(settings=settings)
+    engine = make_engine(
+        db_uri=settings.db_uri_as_string,
+    )
+
+    session_factory = make_session_factory(
+        engine=engine,
+    )
+
+    coin_repository = CoinRepository()
+
+    alert_repository = AlertRepository()
+
+    api_service = APIService(
+        settings=settings,
+        coin_repository=coin_repository,
+        alert_repository=alert_repository,
+        session_factory=session_factory,
+    )
 
     return build_api(api_service=api_service)
 
