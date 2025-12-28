@@ -12,6 +12,8 @@ def execute():
         topic=settings.COINGECKO_KAFKA_TOPIC,
     )
 
+    consumer.setup_signal_handlers()
+
     processor_service = ProcessorService(
         settings=settings,
         kafka_consumer=consumer,

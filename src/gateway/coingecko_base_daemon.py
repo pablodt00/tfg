@@ -75,4 +75,8 @@ class CoinGeckoBaseDaemon(BaseDaemon):
         self.logger.info(
             "CoinGeckoBaseDaemon: Sleeping before next execution",
         )
-        time.sleep(SLEEP_TIME_BETWEEN_RUNS_SECONDS)
+
+        elapsed = 0
+        while elapsed < SLEEP_TIME_BETWEEN_RUNS_SECONDS and self.rerun:
+            time.sleep(1)
+            elapsed += 1
