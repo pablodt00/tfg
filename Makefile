@@ -101,6 +101,9 @@ create-migration:
 migrate:
 	${DC} run --rm alembic -c src/common/database/alembic/alembic.ini upgrade head
 
+
+# Kubernetes / Knative targets
+
 k8s-setup:
 	chmod +x scripts/setup_knative.sh
 	./scripts/setup_knative.sh
@@ -111,3 +114,9 @@ k8s-delete:
 k8s-status:
 	kubectl get pods -n knative-serving
 	kubectl get ksvc --all-namespaces
+
+k8s-db-deploy:
+	kubectl apply -f kubernetes/database-deployment.yaml
+
+k8s-db-shell:
+	kubectl exec -it deployment/tfg-db -- psql -U tfg_user -d tfg_db
