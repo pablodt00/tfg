@@ -4,8 +4,16 @@ DC=docker-compose -p ${PROJECT} -f ${COMPOSE_FILE}
 
 DOCKERFILE=docker/Dockerfile
 
+DOCKER_USER=DOCKER_USER
+
 build:
 	docker build -f docker/Dockerfile -t tfg .
+
+build-push:
+	docker login
+	make build
+	docker tag tfg:latest ${DOCKER_USER}/tfg:latest
+	docker push ${DOCKER_USER}/tfg:latest
 
 shell:
 	${DC} run --rm shell
@@ -102,7 +110,7 @@ migrate:
 	${DC} run --rm alembic -c src/common/database/alembic/alembic.ini upgrade head
 
 
-# Kubernetes / Knative targets
+# Kubernetes / Knative commands
 
 k8s-setup:
 	chmod +x scripts/setup_knative.sh
@@ -115,8 +123,33 @@ k8s-status:
 	kubectl get pods -n knative-serving
 	kubectl get ksvc --all-namespaces
 
+
+# Database in kubernetes
+
 k8s-db-deploy:
 	kubectl apply -f kubernetes/database-deployment.yaml
 
 k8s-db-shell:
 	kubectl exec -it deployment/tfg-db -- psql -U tfg_user -d tfg_db
+
+
+# API Daemon in Knative
+
+k8s-api-deploy:
+	kubectl apply -f kubernetes/api-daemon/configmap.yaml
+	kubectl apply -f kubernetes/api-daemon/service.yaml
+
+k8s-api-delete:
+	kubectl delete -f kubernetes/api-daemon/service.yaml
+	kubectl delete -f kubernetes/api-daemon/configmap.yaml
+
+k8s-api-logs:
+	kubectl logs -l serving.knative.dev/service=api-daemon -c user-container -f
+
+k8s-api-status:
+	kubectl get ksvc api-daemon
+	kubectl get pods -l serving.knative.dev/service=api-daemon
+
+k8s-api-forward:
+	kubectl port-forward deployment/api-daemon-00001-deployment 8080:8000
+

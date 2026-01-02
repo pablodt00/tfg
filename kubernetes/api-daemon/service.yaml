@@ -1,0 +1,24 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: api-daemon
+  namespace: default
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "3"
+    spec:
+      containers:
+        - image: DOCKER_USER/tfg:latest
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: PYTHONPATH
+              value: /srv/src
+          envFrom:
+            - configMapRef:
+                name: api-daemon-config
+          command: ["/srv/scripts/api_daemon.sh"]
