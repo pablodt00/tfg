@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tfg-db-migration
+spec:
+  template:
+    spec:
+      containers:
+      - name: alembic
+        image: DOCKER_USER/tfg:latest
+        command: ["alembic", "-c", "src/common/database/alembic/alembic.ini", "upgrade", "head"]
+        env:
+        - name: PYTHONPATH
+          value: "/srv/src"
+        - name: DB_HOST
+          value: "tfg-db"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "tfg_db"
+        - name: DB_USER
+          value: "tfg_user"
+        - name: DB_PASSWORD
+          value: "tfg_password"
+        - name: COINGECKO_API_KEY
+          value: "CG-HJ1MQ4HXvhWUz9J7aRQgbUUw"
+        - name: COINGECKO_BASE_URL
+          value: "https://api.coingecko.com/api/v3"
+        - name: COINGECKO_TIMEOUT
+          value: "10"
+        - name: HEARTBEAT_FILE
+          value: "/tmp/health-check"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka:9092"
+        - name: COINGECKO_KAFKA_TOPIC
+          value: "coingecko-prices.updates"
+        - name: CONSUMER_GROUP_ID
+          value: "tfg-consumer-group"
+      restartPolicy: Never
+  backoffLimit: 3
