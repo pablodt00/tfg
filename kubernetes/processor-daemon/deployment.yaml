@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor-daemon
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processor-daemon
+  template:
+    metadata:
+      labels:
+        app: processor-daemon
+    spec:
+      containers:
+        - name: processor-daemon
+          image: DOCKER_USER/tfg:latest
+          command: ["/bin/bash"]
+          args: ["/srv/scripts/processor_daemon.sh"]
+          env:
+            - name: PYTHONPATH
+              value: "/srv/src"
+          envFrom:
+            - configMapRef:
+                name: processor-daemon-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
