@@ -1,12 +1,12 @@
 k8s-monitoring-deploy:
-	kubectl apply -f kubernetes/monitoring/prometheus-rbac.yaml
-	kubectl apply -f kubernetes/monitoring/prometheus.yaml
-	kubectl apply -f kubernetes/monitoring/grafana.yaml
+	kubectl apply -f kubernetes/prometheus-rbac.yaml
+	kubectl apply -f kubernetes/prometheus.yaml
+	kubectl apply -f kubernetes/grafana.yaml
 
 k8s-monitoring-delete:
-	kubectl delete -f kubernetes/monitoring/grafana.yaml --ignore-not-found=true
-	kubectl delete -f kubernetes/monitoring/prometheus.yaml --ignore-not-found=true
-	kubectl delete -f kubernetes/monitoring/prometheus-rbac.yaml --ignore-not-found=true
+	kubectl delete -f kubernetes/grafana.yaml --ignore-not-found=true
+	kubectl delete -f kubernetes/prometheus.yaml --ignore-not-found=true
+	kubectl delete -f kubernetes/prometheus-rbac.yaml --ignore-not-found=true
 
 k8s-monitoring-status:
 	kubectl get pods -n monitoring

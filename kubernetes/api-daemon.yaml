@@ -11,7 +11,7 @@ spec:
         autoscaling.knative.dev/maxScale: "3"
     spec:
       containers:
-        - image: DOCKER_USER/tfg:latest
+        - image: pabloduranebury/tfg:latest
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -20,5 +20,5 @@ spec:
               value: /srv/src
           envFrom:
             - configMapRef:
-                name: api-daemon-config
+                name: tfg-config
           command: ["/srv/scripts/api_daemon.sh"]

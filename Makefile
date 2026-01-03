@@ -2,9 +2,10 @@ PROJECT ?= tfg
 COMPOSE_FILE=docker/docker-compose.yml
 DC=docker-compose -p ${PROJECT} -f ${COMPOSE_FILE}
 DOCKERFILE=docker/Dockerfile
-DOCKER_USER=DOCKER_USER
+DOCKER_USER=pabloduranebury
 
 include makefiles/api-daemon.mk
+include makefiles/application.mk
 include makefiles/coingecko-api-daemon.mk
 include makefiles/database.mk
 include makefiles/development.mk

@@ -1,33 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: coingecko-daemon
+  name: processor-daemon
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: coingecko-daemon
+      app: processor-daemon
   template:
     metadata:
       labels:
-        app: coingecko-daemon
+        app: processor-daemon
     spec:
       containers:
-        - name: coingecko-daemon
-          image: DOCKER_USER/tfg:latest
+        - name: processor-daemon
+          image: pabloduranebury/tfg:latest
           command: ["/bin/bash"]
-          args: ["/srv/scripts/coingecko_api_daemon.sh"]
-          ports:
-            - containerPort: 8000
-              name: metrics
-              protocol: TCP
+          args: ["/srv/scripts/processor_daemon.sh"]
           env:
             - name: PYTHONPATH
               value: "/srv/src"
           envFrom:
             - configMapRef:
-                name: coingecko-daemon-config
+                name: tfg-config
           resources:
             requests:
               memory: "256Mi"

@@ -1,10 +1,9 @@
 k8s-api-deploy:
-	kubectl apply -f kubernetes/api-daemon/configmap.yaml
-	kubectl apply -f kubernetes/api-daemon/service.yaml
+	kubectl apply -f kubernetes/configmap.yaml
+	kubectl apply -f kubernetes/api-daemon.yaml
 
 k8s-api-delete:
-	kubectl delete -f kubernetes/api-daemon/service.yaml
-	kubectl delete -f kubernetes/api-daemon/configmap.yaml
+	kubectl delete -f kubernetes/api-daemon.yaml
 
 k8s-api-logs:
 	kubectl logs -l serving.knative.dev/service=api-daemon -c user-container -f

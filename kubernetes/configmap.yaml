@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: processor-daemon-config
+  name: tfg-config
   namespace: default
 data:
   DB_HOST: tfg-db
