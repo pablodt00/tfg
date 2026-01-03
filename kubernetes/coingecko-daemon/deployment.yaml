@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coingecko-daemon
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coingecko-daemon
+  template:
+    metadata:
+      labels:
+        app: coingecko-daemon
+    spec:
+      containers:
+        - name: coingecko-daemon
+          image: DOCKER_USER/tfg:latest
+          command: ["/bin/bash"]
+          args: ["/srv/scripts/coingecko_api_daemon.sh"]
+          env:
+            - name: PYTHONPATH
+              value: "/srv/src"
+          envFrom:
+            - configMapRef:
+                name: coingecko-daemon-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

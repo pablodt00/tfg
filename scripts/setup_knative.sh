@@ -42,6 +42,17 @@ kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1
 echo "🌐 Installing Kourier..."
 kubectl apply -f https://github.com/knative/net-kourier/releases/download/knative-v1.12.0/kourier.yaml
 
+echo "📥 Installing Knative Eventing..."
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.12.0/eventing-crds.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.12.0/eventing-core.yaml
+
+echo "📥 Installing Kafka Source..."
+kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-controller.yaml
+kubectl apply -f https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-source.yaml
+
+echo "⏳ Waiting for Knative Eventing to be ready..."
+kubectl wait --for=condition=Available deployment --all -n knative-eventing --timeout=300s
+
 kubectl patch configmap/config-network \
   --namespace knative-serving \
   --type merge \

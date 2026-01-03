@@ -1,0 +1,23 @@
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  name: kafka-broker
+  namespace: default
+  annotations:
+    eventing.knative.dev/broker.class: Kafka
+spec:
+  config:
+    apiVersion: v1
+    kind: ConfigMap
+    name: kafka-broker-config
+    namespace: knative-eventing
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-broker-config
+  namespace: knative-eventing
+data:
+  bootstrap.servers: "redpanda.kafka.svc.cluster.local:9092"
+  default.topic.replication.factor: "1"
+  default.topic.partitions: "1"
