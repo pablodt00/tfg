@@ -5,6 +5,7 @@ from structlog.typing import FilteringBoundLogger
 from common.client.coingecko_client import CoinGeckoClient
 from common.client.endpoints.coin_price_by_id import CoinPriceByIdEndpoint
 from common.config.settings import Settings
+from common.observability.metrics import coingecko_api_requests
 from common.producers.kafka_producer import KafkaProducer
 
 default_logger = structlog.get_logger()
@@ -48,6 +49,8 @@ class CoinGeckoAPIService:
                     "Successfully retrieved data from CoinGecko API",
                     data=coin_price_data,
                 )
+
+                coingecko_api_requests.inc()
 
                 self.publish_to_kafka(message=coin_price_data)
                 self.logger.info(

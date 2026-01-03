@@ -12,3 +12,4 @@ alembic
 asyncpg
 uvicorn
 fastapi
+prometheus-client

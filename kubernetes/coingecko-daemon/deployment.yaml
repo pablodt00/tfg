@@ -15,9 +15,13 @@ spec:
     spec:
       containers:
         - name: coingecko-daemon
-          image: DOCKER_USER/tfg:latest
+          image: pabloduranebury/tfg:latest
           command: ["/bin/bash"]
           args: ["/srv/scripts/coingecko_api_daemon.sh"]
+          ports:
+            - containerPort: 8000
+              name: metrics
+              protocol: TCP
           env:
             - name: PYTHONPATH
               value: "/srv/src"

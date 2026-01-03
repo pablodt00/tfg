@@ -1,3 +1,5 @@
+from prometheus_client import start_http_server
+
 from common.config.settings import Settings
 from common.daemons.heartbeat_handler import make_heartbeat_handler
 from common.producers.kafka_producer import KafkaProducer
@@ -7,6 +9,8 @@ from gateway.coingecko_service import CoinGeckoAPIService
 
 
 def execute():
+    start_http_server(8000)
+
     settings = Settings()
 
     kafka_producer = KafkaProducer(
