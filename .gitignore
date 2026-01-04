@@ -1,2 +1,4 @@
 .idea
 __pycache__
+/docker/local.env
+/kubernetes/configmap.yaml
