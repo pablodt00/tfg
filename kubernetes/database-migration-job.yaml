@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: alembic
-        image: pabloduranebury/tfg:latest
+        image: DOCKER_USER/tfg:latest
         command: ["alembic", "-c", "src/common/database/alembic/alembic.ini", "upgrade", "head"]
         env:
         - name: PYTHONPATH

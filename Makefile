@@ -2,7 +2,7 @@ PROJECT ?= tfg
 COMPOSE_FILE=docker/docker-compose.yml
 DC=docker-compose -p ${PROJECT} -f ${COMPOSE_FILE}
 DOCKERFILE=docker/Dockerfile
-DOCKER_USER=pabloduranebury
+DOCKER_USER=DOCKER_USER
 
 include makefiles/api-daemon.mk
 include makefiles/application.mk

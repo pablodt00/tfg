@@ -11,7 +11,7 @@ spec:
         autoscaling.knative.dev/maxScale: "3"
     spec:
       containers:
-        - image: pabloduranebury/tfg:latest
+        - image: DOCKER_USER/tfg:latest
           ports:
             - containerPort: 8000
               protocol: TCP

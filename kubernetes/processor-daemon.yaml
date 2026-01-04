@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: processor-daemon
-          image: pabloduranebury/tfg:latest
+          image: DOCKER_USER/tfg:latest
           command: ["/bin/bash"]
           args: ["/srv/scripts/processor_daemon.sh"]
           env:
