@@ -12,6 +12,7 @@ from common.consumers.kafka_consumer import KafkaConsumer
 from common.database import SessionFactory
 from common.database.repositories.alert_repository import AlertRepository
 from common.database.repositories.coin_repository import CoinRepository
+from common.schemas.alert import AlertConditionEnum
 from common.schemas.coin import Coin
 
 default_logger = structlog.get_logger()
@@ -124,8 +125,33 @@ class ProcessorService:
                 await session.rollback()
                 raise
 
+    async def check_alerts(self, coin: str, data: dict):
+        coin_price = data[coin]["eur"]
+        async with self.session_factory() as session:
+            try:
+                self.logger.info("Getting alerts for coin", coin=coin)
+                alerts = await self.alert_repository.get_by_coin(
+                    coin=coin,
+                    session=session,
+                )
+
+                for alert in alerts:
+                    if alert.condition == AlertConditionEnum.GREATER_THAN_OR_EQUAL:
+                        if coin_price >= alert.amount:
+                            self.logger.info("Alert triggered for coin", coin=coin)
+                            # logic to notify user
+                    else:
+                        if coin_price <= alert.amount:
+                            self.logger.info("Alert triggered for coin", coin=coin)
+                            # logic to notify user
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+
     async def process_data(self, data: dict):
         for coin in data:
             await self.process_coin(coin, data)
+            await self.check_alerts(coin, data)
 
         self.logger.info("ProcessorService: Processed last received data")
