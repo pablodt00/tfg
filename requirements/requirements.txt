@@ -13,3 +13,4 @@ asyncpg
 uvicorn
 fastapi
 prometheus-client
+sendgrid-async

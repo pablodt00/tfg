@@ -16,3 +16,5 @@ data:
   KAFKA_BOOTSTRAP_SERVERS: "redpanda.kafka.svc.cluster.local:9092"
   COINGECKO_KAFKA_TOPIC: "coingecko-prices.updates"
   CONSUMER_GROUP_ID: "tfg-consumer-group"
+  SENDGRID_API_KEY: "api_key"
+

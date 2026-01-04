@@ -14,6 +14,7 @@ from common.database.repositories.alert_repository import AlertRepository
 from common.database.repositories.coin_repository import CoinRepository
 from common.schemas.alert import AlertConditionEnum
 from common.schemas.coin import Coin
+from processor.email_service import EmailService
 
 default_logger = structlog.get_logger()
 
@@ -36,6 +37,10 @@ class ProcessorService:
         self.logger = logger
         self._loop = None
         self._loop_thread = None
+        self.email_service = EmailService(
+            api_key=self.settings.SENDGRID_API_KEY,
+            from_email=self.settings.FROM_EMAIL,
+        )
 
     def _start_event_loop(self):
         asyncio.set_event_loop(self._loop)
@@ -139,15 +144,39 @@ class ProcessorService:
                     if alert.condition == AlertConditionEnum.GREATER_THAN_OR_EQUAL:
                         if coin_price >= alert.amount:
                             self.logger.info("Alert triggered for coin", coin=coin)
-                            # logic to notify user
+                            await self.send_alert(
+                                coin=coin,
+                                coin_price=coin_price,
+                                condition=alert.condition.value,
+                                threshold=alert.amount,
+                                email=alert.user_email,
+                            )
                     else:
                         if coin_price <= alert.amount:
                             self.logger.info("Alert triggered for coin", coin=coin)
-                            # logic to notify user
+                            await self.send_alert(
+                                coin=coin,
+                                coin_price=coin_price,
+                                condition=alert.condition.value,
+                                threshold=alert.amount,
+                                email=alert.user_email,
+                            )
+
                 await session.commit()
             except Exception:
                 await session.rollback()
                 raise
+
+    async def send_alert(
+        self, coin: str, coin_price: float, condition: str, threshold: float, email: str
+    ):
+        await self.email_service.send_alert_email(
+            to_email=email,
+            coin=coin,
+            price=coin_price,
+            condition=condition,
+            threshold=threshold,
+        )
 
     async def process_data(self, data: dict):
         for coin in data:

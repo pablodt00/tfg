@@ -39,6 +39,11 @@ class Settings(BaseSettings):
 
     DB_NAME: str = Field(alias="DB_NAME")
 
+    # Email
+    SENDGRID_API_KEY: str = Field(alias="SENDGRID_API_KEY")
+
+    FROM_EMAIL: str = Field(default="dummy@gmail.com")
+
     @property
     def db_uri_as_string(self) -> str:
         return (
