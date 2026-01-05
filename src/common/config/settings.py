@@ -44,6 +44,9 @@ class Settings(BaseSettings):
 
     FROM_EMAIL: str = Field(default="dummy@gmail.com")
 
+    # API Daemon
+    API_DAEMON_HOST: str = Field(alias="API_DAEMON_HOST")
+
     @property
     def db_uri_as_string(self) -> str:
         return (

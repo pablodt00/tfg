@@ -137,6 +137,17 @@ services:
     ports:
       - "8000:8000"
 
+  webapp-daemon:
+    extends:
+      service: daemon
+    depends_on:
+      - api-daemon
+    entrypoint: "/srv/app/scripts/webapp-daemon.sh"
+    ports:
+      - "8501:8501"
+    networks:
+      - service
+
 volumes:
    postgres-volume:
 
