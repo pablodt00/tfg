@@ -17,5 +17,4 @@ data:
   COINGECKO_KAFKA_TOPIC: "coingecko-prices.updates"
   CONSUMER_GROUP_ID: "tfg-consumer-group"
   SENDGRID_API_KEY: "api_key"
-  API_DAEMON_HOST: ""
-
+  API_DAEMON_HOST: "http://api-daemon.default.svc.cluster.local"

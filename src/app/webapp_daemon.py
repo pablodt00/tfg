@@ -1,14 +1,38 @@
+# pylint: disable=redefined-outer-name, broad-exception-caught, invalid-name
 import requests
 import streamlit as st
+import structlog
 
 from common.config.settings import Settings
 
 settings = Settings()
 
+default_logger = structlog.get_logger()
+
+COIN_NAME_TO_SYMBOL = {
+    "Bitcoin": "btc",
+    "Ethereum": "eth",
+    "Tether": "usdt",
+    "XRP": "xrp",
+    "BNB": "bnb",
+    "USD Coin": "usdc",
+    "Solana": "sol",
+    "Dogecoin": "doge",
+    "Cardano": "ada",
+    "Polkadot": "dot",
+}
+
+DEFAULT_COINS_DATA = {
+    "Name": list(COIN_NAME_TO_SYMBOL.keys()),
+    "Last Price (€)": ["-"] * len(COIN_NAME_TO_SYMBOL),
+    "Price Change 1 min": ["-"] * len(COIN_NAME_TO_SYMBOL),
+    "Price Change 5 mins": ["-"] * len(COIN_NAME_TO_SYMBOL),
+}
+
 
 def fetch_coins_data():
     try:
-        response = requests.get(f"{settings.API_DAEMON_HOST}/coins/coins")
+        response = requests.get(f"{settings.API_DAEMON_HOST}/coins/coins", timeout=10)
         response.raise_for_status()
         data = response.json()
 
@@ -21,13 +45,22 @@ def fetch_coins_data():
         return coins_data
     except Exception as e:
         st.error(f"Error fetching coins data: {str(e)}")
-        return None
+        return DEFAULT_COINS_DATA
 
 
-def send_alert(email, coin, operator, amount):
+def send_alert(email, coin, operator, amount, logger):
     try:
-        payload = {"email": email, "coin": coin, "operator": operator, "amount": amount}
-        response = requests.post(f"{settings.API_DAEMON_HOST}/alerts/add", json=payload)
+        coin_symbol = COIN_NAME_TO_SYMBOL[coin]
+        payload = {
+            "coin": coin_symbol,
+            "amount": amount,
+            "email": email,
+            "condition": operator,
+        }
+        logger.info("Performing request to set alert", payload=payload)
+        response = requests.post(
+            f"{settings.API_DAEMON_HOST}/alerts/add", json=payload, timeout=10
+        )
         response.raise_for_status()
         return True
     except Exception as e:
@@ -58,16 +91,19 @@ with tab2:
 
     email = st.text_input("Email Address", placeholder="Enter your email")
 
-    coins = ["Bitcoin", "Ethereum", "Cardano", "Solana"]
-    selected_coin = st.selectbox("Select Coin", coins)
+    selected_coin = st.selectbox("Select Coin", list(COIN_NAME_TO_SYMBOL.keys()))
 
     operator = st.selectbox("Condition", [">=", "<="])
 
-    amount = st.text_input("Alert Price", placeholder="Enter target price")
+    amount = st.number_input("Alert Price", placeholder="Enter target price")
 
     if st.button("Set Alert"):
         if email and selected_coin and amount:
-            if send_alert(email, selected_coin, operator, amount):
+            if operator == ">=":
+                operator_text = "GREATER_THAN_OR_EQUAL"
+            else:
+                operator_text = "LESS_THAN_OR_EQUAL"
+            if send_alert(email, selected_coin, operator_text, amount, default_logger):
                 st.success(
                     f"Alert set for {selected_coin} {operator} ${amount} for {email}"
                 )

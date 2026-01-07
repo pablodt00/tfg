@@ -13,4 +13,4 @@ k8s-webapp-status:
 	kubectl get pods -l serving.knative.dev/service=webapp-daemon
 
 k8s-webapp-forward:
-	kubectl port-forward deployment/webapp-daemon-00001-deployment 8081:8080
+	kubectl port-forward deployment/webapp-daemon-00001-deployment 8501:8501
