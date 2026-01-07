@@ -1,7 +1,7 @@
 # pylint: disable=too-many-arguments, too-many-positional-arguments, broad-exception-caught
 import structlog
 from async_sendgrid import SendgridAPI
-from async_sendgrid.sendgrid import Mail
+from sendgrid.helpers.mail import Mail
 
 default_logger = structlog.get_logger()
 
