@@ -36,11 +36,29 @@ def fetch_coins_data():
         response.raise_for_status()
         data = response.json()
 
+        symbol_to_name = {v: k for k, v in COIN_NAME_TO_SYMBOL.items()}
+
         coins_data = {
-            "Name": [coin["name"] for coin in data],
+            "Name": [
+                symbol_to_name.get(coin["coin"], coin["coin"].upper()) for coin in data
+            ],
             "Last Price (€)": [coin["last_price"] for coin in data],
-            "Price Change 1 min": [coin["change_1min"] for coin in data],
-            "Price Change 5 mins": [coin["change_5min"] for coin in data],
+            "Price Change 1 min": [
+                (
+                    f"{coin['price_1_min_change_percent']}%"
+                    if coin["price_1_min_change_percent"] is not None
+                    else "-"
+                )
+                for coin in data
+            ],
+            "Price Change 5 mins": [
+                (
+                    f"{coin['price_5_min_change_percent']}%"
+                    if coin["price_5_min_change_percent"] is not None
+                    else "-"
+                )
+                for coin in data
+            ],
         }
         return coins_data
     except Exception as e:
@@ -82,7 +100,7 @@ with tab1:
     if coins_data:
         col1, col2, col3 = st.columns([1, 4, 1])
         with col2:
-            st.dataframe(coins_data, use_container_width=True, height=200)
+            st.dataframe(coins_data, width="stretch", height=200)
     else:
         st.warning("Unable to load cryptocurrency data")
 
