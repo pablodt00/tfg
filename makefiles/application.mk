@@ -18,6 +18,8 @@ tfg:
 	@echo "✅ Kafka topic creation complete!"
 	make k8s-api-deploy
 	@echo "✅ API Daemon deploy complete!"
+	make k8s-webapp-deploy
+	@echo "✅ Webapp Daemon deploy complete!"
 	@sleep 10
 	make k8s-coingecko-deploy
 	@echo "✅ Coingecko API Daemon deploy complete!"
