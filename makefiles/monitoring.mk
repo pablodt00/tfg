@@ -1,10 +1,15 @@
 k8s-monitoring-deploy:
 	kubectl apply -f kubernetes/prometheus-rbac.yaml
 	kubectl apply -f kubernetes/prometheus.yaml
+	kubectl delete configmap grafana-dashboards -n monitoring --ignore-not-found=true
+	kubectl create configmap grafana-dashboards \
+	  --from-file=kubernetes/grafana-dashboards/ \
+	  --namespace=monitoring
 	kubectl apply -f kubernetes/grafana.yaml
 
 k8s-monitoring-delete:
 	kubectl delete -f kubernetes/grafana.yaml --ignore-not-found=true
+	kubectl delete configmap grafana-dashboards -n monitoring --ignore-not-found=true
 	kubectl delete -f kubernetes/prometheus.yaml --ignore-not-found=true
 	kubectl delete -f kubernetes/prometheus-rbac.yaml --ignore-not-found=true
 
