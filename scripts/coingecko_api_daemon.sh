@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "$0 Running api-daemon"
+echo "$0 Running coingecko-api-daemon"
 
 exec uvicorn gateway.coingecko_api_daemon:execute \
     --factory \

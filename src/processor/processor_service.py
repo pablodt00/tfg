@@ -1,14 +1,10 @@
 # pylint: disable=too-many-arguments, too-many-positional-arguments
-import asyncio
-import json
-import threading
 from datetime import datetime, timedelta
 
 import structlog
 from structlog.typing import FilteringBoundLogger
 
 from common.config.settings import Settings
-from common.consumers.kafka_consumer import KafkaConsumer
 from common.database import SessionFactory
 from common.database.repositories.alert_repository import AlertRepository
 from common.database.repositories.coin_repository import CoinRepository
@@ -23,59 +19,20 @@ class ProcessorService:
     def __init__(
         self,
         settings: Settings,
-        kafka_consumer: KafkaConsumer,
         coin_repository: CoinRepository,
         alert_repository: AlertRepository,
         session_factory: SessionFactory,
         logger: FilteringBoundLogger = default_logger,
     ):
         self.settings = settings
-        self.kafka_consumer = kafka_consumer
         self.coin_repository = coin_repository
         self.alert_repository = alert_repository
         self.session_factory = session_factory
         self.logger = logger
-        self._loop = None
-        self._loop_thread = None
         self.email_service = EmailService(
             api_key=self.settings.SENDGRID_API_KEY,
             from_email=self.settings.FROM_EMAIL,
         )
-
-    def _start_event_loop(self):
-        asyncio.set_event_loop(self._loop)
-        self._loop.run_forever()
-
-    async def _handle_message_async(self, message: str):
-        self.logger.info("Received Kafka message", message=message)
-
-        try:
-            data = json.loads(message)
-            self.logger.info("Processing message", data=data)
-            await self.process_data(data)
-        except json.JSONDecodeError:
-            self.logger.error("Failed to decode message", message=message)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self.logger.error("Error processing message", error=str(e), exc_info=True)
-
-    def _handle_message(self, message: str):
-        asyncio.run_coroutine_threadsafe(
-            self._handle_message_async(message), self._loop
-        )
-
-    def run(self):
-        self.logger.info("ProcessorService: Running")
-
-        self._loop = asyncio.new_event_loop()
-        self._loop_thread = threading.Thread(target=self._start_event_loop, daemon=True)
-        self._loop_thread.start()
-
-        try:
-            self.kafka_consumer.consume_messages(self._handle_message)
-        finally:
-            self._loop.call_soon_threadsafe(self._loop.stop)
-            self._loop_thread.join(timeout=5)
-            self._loop.close()
 
     async def process_coin(self, coin: str, data: dict):
         coin_price = data[coin]["eur"]

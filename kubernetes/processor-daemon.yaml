@@ -1,23 +1,26 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: serving.knative.dev/v1
+kind: Service
 metadata:
-  name: processor-daemon
+  name: processor-service
   namespace: default
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: processor-daemon
   template:
     metadata:
-      labels:
-        app: processor-daemon
+      annotations:
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/max-scale: "3"
+        autoscaling.knative.dev/metric: "concurrency"
+        autoscaling.knative.dev/target: "10"
     spec:
       containers:
-        - name: processor-daemon
+        - name: processor-service
           image: DOCKER_USER/tfg:latest
           command: ["/bin/bash"]
           args: ["/srv/scripts/processor_daemon.sh"]
+          ports:
+            - name: http1
+              containerPort: 8000
+              protocol: TCP
           env:
             - name: PYTHONPATH
               value: "/srv/src"
@@ -31,3 +34,15 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health/ping
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ping
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5

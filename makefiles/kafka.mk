@@ -34,3 +34,9 @@ k8s-kafka-consume:
 	kubectl exec -it -n kafka deployment/redpanda -- \
 		rpk topic consume ${TOPIC} --offset start
 
+k8s-kafka-broker-setup:
+	kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-controller.yaml
+	kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-broker.yaml
+	kubectl wait --for=condition=Available --timeout=600s deployment/kafka-controller -n knative-eventing
+	kubectl wait --for=condition=Available --timeout=600s deployment/kafka-broker-receiver -n knative-eventing
+	kubectl wait --for=condition=Available --timeout=600s deployment/kafka-broker-dispatcher -n knative-eventing

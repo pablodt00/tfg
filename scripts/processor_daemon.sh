@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-echo "$0 Running daemon_processor"
+echo "$0 Running processor-daemon"
 
-export CONSUMER_GROUP_ID=processor-daemon
-exec python /srv/src/processor/processor_daemon.py
+exec uvicorn processor.processor_daemon:execute \
+    --factory \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --proxy-headers

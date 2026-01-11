@@ -16,6 +16,7 @@ tfg:
 	@sleep 30
 	make k8s-kafka-create-topic TOPIC=coingecko-prices.updates
 	@echo "✅ Kafka topic creation complete!"
+	make k8s-kafka-broker-setup
 	make k8s-api-deploy
 	@echo "✅ API Daemon deploy complete!"
 	make k8s-webapp-deploy

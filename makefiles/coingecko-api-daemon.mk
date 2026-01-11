@@ -16,4 +16,10 @@ k8s-coingecko-api-daemon-status:
 	kubectl get pods -l serving.knative.dev/service=coingecko-service
 
 k8s-coingecko-api-daemon-forward:
-	kubectl port-forward service/coingecko-service 8001:8000
+	@DEPLOYMENT=$$(kubectl get deployment -l serving.knative.dev/service=coingecko-service -o jsonpath='{.items[0].metadata.name}'); \
+	if [ -z "$$DEPLOYMENT" ]; then \
+		echo "Error: No coingecko-service deployment found"; \
+		exit 1; \
+	fi; \
+	echo "Forwarding to deployment: $$DEPLOYMENT"; \
+	kubectl port-forward deployment/$$DEPLOYMENT 8001:8000
