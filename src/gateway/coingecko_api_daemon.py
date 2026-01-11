@@ -1,15 +1,10 @@
-from prometheus_client import start_http_server
-
 from common.config.settings import Settings
-from common.daemons.heartbeat_handler import make_heartbeat_handler
 from common.producers.kafka_producer import KafkaProducer
-from gateway.coingecko_base_daemon import CoinGeckoBaseDaemon
-from gateway.coingecko_controller import CoinGeckoAPIController
 from gateway.coingecko_service import CoinGeckoAPIService
+from gateway.endpoints.app import build_coingecko_api_daemon
 
 
 def execute():
-    start_http_server(8000)
 
     settings = Settings()
 
@@ -23,17 +18,21 @@ def execute():
         kafka_producer=kafka_producer,
     )
 
-    coingecko_api_controller = CoinGeckoAPIController(
-        service=coingecko_api_service,
+    return build_coingecko_api_daemon(
+        coingecko_api_service=coingecko_api_service,
     )
-
-    coingecko_base_daemon = CoinGeckoBaseDaemon(
-        controller=coingecko_api_controller,
-        heartbeat_handler=make_heartbeat_handler(settings=settings),
-    )
-
-    coingecko_base_daemon.start()
 
 
 if __name__ == "__main__":
-    execute()
+    import os
+
+    import uvicorn
+
+    app_name = os.path.basename(__file__).replace(".py", "")
+    uvicorn.run(
+        app=f"gateway.{app_name}:execute",
+        host="0.0.0.0",
+        port=8000,
+        workers=1,
+        factory=True,
+    )

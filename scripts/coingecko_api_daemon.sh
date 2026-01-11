@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-echo "$0 Running coingecko_api_daemon"
+echo "$0 Running api-daemon"
 
-export CONSUMER_GROUP_ID=coingecko_api_daemon
-exec python /srv/src/gateway/coingecko_api_daemon.py
+exec uvicorn gateway.coingecko_api_daemon:execute \
+    --factory \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --proxy-headers

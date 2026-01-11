@@ -1,0 +1,15 @@
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: coingecko-cronjob
+  namespace: default
+spec:
+  schedule: "*/1 * * * *"
+  contentType: "application/json"
+  data: '{"trigger": "scheduled"}'
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: coingecko-service
+    uri: /coingecko/fetch

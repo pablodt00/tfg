@@ -1,26 +1,25 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: serving.knative.dev/v1
+kind: Service
 metadata:
-  name: coingecko-daemon
+  name: coingecko-service
   namespace: default
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: coingecko-daemon
   template:
     metadata:
-      labels:
-        app: coingecko-daemon
+      annotations:
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/max-scale: "3"
+        autoscaling.knative.dev/metric: "concurrency"
+        autoscaling.knative.dev/target: "10"
     spec:
       containers:
-        - name: coingecko-daemon
+        - name: coingecko-service
           image: DOCKER_USER/tfg:latest
           command: ["/bin/bash"]
           args: ["/srv/scripts/coingecko_api_daemon.sh"]
           ports:
-            - containerPort: 8000
-              name: metrics
+            - name: http1
+              containerPort: 8000
               protocol: TCP
           env:
             - name: PYTHONPATH
@@ -35,3 +34,15 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health/ping
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ping
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
