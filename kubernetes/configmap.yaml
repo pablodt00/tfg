@@ -9,7 +9,7 @@ data:
   DB_NAME: tfg_db
   DB_USER: tfg_user
   DB_PASSWORD: tfg_password
-  COINGECKO_API_KEY: "CG-HJ1MQ4HXvhWUz9J7aRQgbUUw"
+  COINGECKO_API_KEY: "api_key"
   COINGECKO_BASE_URL: "https://api.coingecko.com/api/v3"
   COINGECKO_TIMEOUT: "10"
   HEARTBEAT_FILE: "/tmp/health-check"
@@ -18,4 +18,4 @@ data:
   CONSUMER_GROUP_ID: "tfg-consumer-group"
   SENDGRID_API_KEY: "api_key"
   API_DAEMON_HOST: "http://api-daemon.default.svc.cluster.local"
-  FROM_EMAIL: "pdtqqbs@uma.es"
+  FROM_EMAIL: "from_email"
