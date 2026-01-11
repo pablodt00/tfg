@@ -19,6 +19,7 @@ class Alert(ORMBaseSchema):
     coin: str
     condition: AlertConditionEnum
     amount: float
+    triggered: bool = Field(default=False)
     user_email: str
     created_at: datetime = Field(default_factory=datetime.now)
 

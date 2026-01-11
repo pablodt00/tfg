@@ -151,6 +151,10 @@ class ProcessorService:
                                 threshold=alert.amount,
                                 email=alert.user_email,
                             )
+                            alert.triggered = True
+                            await self.alert_repository.update(
+                                session=session, model=alert, entity_id=alert.id
+                            )
                     else:
                         if coin_price <= alert.amount:
                             self.logger.info("Alert triggered for coin", coin=coin)
@@ -160,6 +164,10 @@ class ProcessorService:
                                 condition=alert.condition.value,
                                 threshold=alert.amount,
                                 email=alert.user_email,
+                            )
+                            alert.triggered = True
+                            await self.alert_repository.update(
+                                session=session, model=alert, entity_id=alert.id
                             )
 
                 await session.commit()

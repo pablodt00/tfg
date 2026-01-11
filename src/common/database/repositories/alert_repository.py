@@ -12,7 +12,10 @@ class AlertRepository(CrudRepository):
 
     async def get_by_coin(self, coin: str, session: AsyncSession) -> list[Alert] | None:
         result = await session.execute(
-            select(self.sql_alchemy_model).where(self.sql_alchemy_model.coin == coin)
+            select(self.sql_alchemy_model).where(
+                self.sql_alchemy_model.coin == coin,
+                self.sql_alchemy_model.triggered is False,
+            )
         )
         data = result.scalars().all()
         return list(map(self.schema.model_validate, data))
