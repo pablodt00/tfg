@@ -14,7 +14,7 @@ class AlertRepository(CrudRepository):
         result = await session.execute(
             select(self.sql_alchemy_model).where(
                 self.sql_alchemy_model.coin == coin,
-                self.sql_alchemy_model.triggered is False,
+                self.sql_alchemy_model.triggered.is_(False),
             )
         )
         data = result.scalars().all()
