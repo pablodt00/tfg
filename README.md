@@ -258,16 +258,7 @@ DB_HOST: "postgresql-service.default.svc.cluster.local"
 ### Testing Local
 
 ```bash
-# Ejecutar todos los tests
-make test
-
-# Ejecutar linters
-make lint
-
-# Ejecutar formatters
-make format
-
-# Ejecutar todo antes de commit
+# Ejecutar formatters, linters y tests antes de commit
 make precommit
 ```
 
