@@ -34,6 +34,16 @@ k8s-kafka-consume:
 	kubectl exec -it -n kafka deployment/redpanda -- \
 		rpk topic consume ${TOPIC} --offset start
 
+k8s-kafka-ui-deploy:
+	kubectl apply -f kubernetes/kafka-ui.yaml
+	kubectl wait --for=condition=Available --timeout=120s deployment/kafka-ui -n kafka
+
+k8s-kafka-ui-delete:
+	kubectl delete -f kubernetes/kafka-ui.yaml
+
+k8s-kafka-ui-open:
+	kubectl port-forward -n kafka svc/kafka-ui 8080:8080
+
 k8s-kafka-broker-setup:
 	kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-controller.yaml
 	kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-broker.yaml
