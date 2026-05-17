@@ -45,4 +45,3 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             ).observe(duration)
 
         return response
-
