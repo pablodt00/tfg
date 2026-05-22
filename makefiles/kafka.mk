@@ -42,7 +42,7 @@ k8s-kafka-ui-delete:
 	kubectl delete -f kubernetes/kafka-ui.yaml
 
 k8s-kafka-ui-open:
-	kubectl port-forward -n kafka svc/kafka-ui 8080:8080
+	kubectl port-forward --address 0.0.0.0 -n kafka svc/kafka-ui 18080:8080
 
 k8s-kafka-broker-setup:
 	kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-v1.12.0/eventing-kafka-controller.yaml

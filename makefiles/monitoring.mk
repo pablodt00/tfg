@@ -18,10 +18,10 @@ k8s-monitoring-status:
 	kubectl get svc -n monitoring
 
 k8s-grafana-forward:
-	kubectl port-forward -n monitoring svc/grafana 3000:3000
+	kubectl port-forward --address 0.0.0.0 -n monitoring svc/grafana 3000:3000
 
 k8s-prometheus-forward:
-	kubectl port-forward -n monitoring svc/prometheus 9091:9090
+	kubectl port-forward --address 0.0.0.0 -n monitoring svc/prometheus 9091:9090
 
 k8s-monitoring-logs-prometheus:
 	kubectl logs -n monitoring -l app=prometheus -f
