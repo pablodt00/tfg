@@ -62,10 +62,26 @@ data:
       relabel_configs:
       - source_labels: [__meta_kubernetes_pod_label_serving_knative_dev_service]
         action: keep
-        regex: (coingecko-service|processor-service)
+        regex: (coingecko-service|processor-service|api-daemon)
       - source_labels: [__address__]
         action: replace
         target_label: __address__
         regex: ([^:]+)(?::\d+)?
         replacement: $1:8000
+      metrics_path: /metrics
+    - job_name: 'knative-autoscaler'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - knative-serving
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: autoscaler
+      - source_labels: [__address__]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?
+        replacement: $1:9090
       metrics_path: /metrics

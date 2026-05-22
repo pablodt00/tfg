@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from prometheus_client import make_asgi_app
 
 from api.api_service import APIService
 from api.endpoints import alerts, coins, health
+from common.observability.middleware import PrometheusMiddleware
 
 
 def build_api(
@@ -13,6 +15,8 @@ def build_api(
     )
 
     app.openapi_version = "3.0.0"
+
+    app.add_middleware(PrometheusMiddleware, service_name="api-daemon")
 
     app.include_router(
         health.make_health_router(),
@@ -35,5 +39,8 @@ def build_api(
         prefix="/coins",
         tags=["Coins"],
     )
+
+    metrics = make_asgi_app()
+    app.mount("/metrics", metrics)
 
     return app

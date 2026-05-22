@@ -5,7 +5,10 @@ from structlog.typing import FilteringBoundLogger
 from common.client.coingecko_client import CoinGeckoClient
 from common.client.endpoints.coin_price_by_id import CoinPriceByIdEndpoint
 from common.config.settings import Settings
-from common.observability.metrics import coingecko_api_requests
+from common.observability.metrics import (
+    coingecko_api_request_duration_seconds,
+    coingecko_api_requests,
+)
 from common.producers.kafka_producer import KafkaProducer
 
 default_logger = structlog.get_logger()
@@ -40,22 +43,23 @@ class CoinGeckoAPIService:
             "CoinGeckoAPIService: Calling CoinGecko API",
         )
         try:
-            async with CoinGeckoClient(settings=self.settings) as client:
-                coin_price_data = await client.get_coins_price_py_id(
-                    coin_price_data=CoinPriceByIdEndpoint.get_default_request(),
-                )
-                self.logger.info(
-                    "CoinGeckoAPIService: "
-                    "Successfully retrieved data from CoinGecko API",
-                    data=coin_price_data,
-                )
+            with coingecko_api_request_duration_seconds.time():
+                async with CoinGeckoClient(settings=self.settings) as client:
+                    coin_price_data = await client.get_coins_price_py_id(
+                        coin_price_data=CoinPriceByIdEndpoint.get_default_request(),
+                    )
+            self.logger.info(
+                "CoinGeckoAPIService: "
+                "Successfully retrieved data from CoinGecko API",
+                data=coin_price_data,
+            )
 
-                coingecko_api_requests.inc()
+            coingecko_api_requests.inc()
 
-                self.publish_to_kafka(message=coin_price_data)
-                self.logger.info(
-                    "CoinGeckoAPIService: Published data to Kafka topic",
-                )
+            self.publish_to_kafka(message=coin_price_data)
+            self.logger.info(
+                "CoinGeckoAPIService: Published data to Kafka topic",
+            )
         except Exception:
             self.logger.exception(
                 "CoinGeckoAPIService: Error calling CoinGecko API",

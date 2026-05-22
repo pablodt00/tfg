@@ -1,4 +1,5 @@
 # pylint: disable=too-many-arguments, too-many-positional-arguments
+import time
 from datetime import datetime, timedelta
 
 import structlog
@@ -8,6 +9,12 @@ from common.config.settings import Settings
 from common.database import SessionFactory
 from common.database.repositories.alert_repository import AlertRepository
 from common.database.repositories.coin_repository import CoinRepository
+from common.observability.metrics import (
+    alert_delivery_time_seconds,
+    alerts_sent_total,
+    event_processing_duration_seconds,
+    events_processed_total,
+)
 from common.schemas.alert import AlertConditionEnum
 from common.schemas.coin import Coin
 from processor.email_service import EmailService
@@ -135,6 +142,7 @@ class ProcessorService:
     async def send_alert(
         self, coin: str, coin_price: float, condition: str, threshold: float, email: str
     ):
+        start = time.perf_counter()
         await self.email_service.send_alert_email(
             to_email=email,
             coin=coin,
@@ -142,10 +150,15 @@ class ProcessorService:
             condition=condition,
             threshold=threshold,
         )
+        alert_delivery_time_seconds.observe(time.perf_counter() - start)
+        alerts_sent_total.labels(coin=coin, condition=condition).inc()
 
     async def process_data(self, data: dict):
+        start = time.perf_counter()
         for coin in data:
             await self.process_coin(coin, data)
             await self.check_alerts(coin, data)
+            events_processed_total.labels(coin=coin).inc()
 
+        event_processing_duration_seconds.observe(time.perf_counter() - start)
         self.logger.info("ProcessorService: Processed last received data")

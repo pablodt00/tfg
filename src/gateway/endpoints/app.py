@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
 
+from common.observability.middleware import PrometheusMiddleware
 from gateway.coingecko_service import CoinGeckoAPIService
 from gateway.endpoints import coins, health
 
@@ -15,6 +16,8 @@ def build_coingecko_api_daemon(
     )
 
     app.openapi_version = "3.0.0"
+
+    app.add_middleware(PrometheusMiddleware, service_name="coingecko-api-daemon")
 
     app.include_router(
         health.make_health_router(),

@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
 
+from common.observability.middleware import PrometheusMiddleware
 from processor.endpoints import events, health
 from processor.processor_service import ProcessorService
 
@@ -15,6 +16,8 @@ def build_processor_daemon(
     )
 
     app.openapi_version = "3.0.0"
+
+    app.add_middleware(PrometheusMiddleware, service_name="processor-daemon")
 
     app.include_router(
         health.make_health_router(),
