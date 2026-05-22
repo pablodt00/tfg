@@ -7,6 +7,7 @@ tfg:
 	@echo "✅ Prometheus & Grafana deployed"
 	make k8s-kafka-create-topic TOPIC=coingecko-prices.updates
 	make k8s-kafka-broker-setup
+	make k8s-kafka-ui-deploy
 	@echo "✅ Kafka deployed"
 	make k8s-migrate
 	@echo "✅ Database deployed"
