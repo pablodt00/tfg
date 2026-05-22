@@ -327,7 +327,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-service\"}",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -383,7 +383,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-service\"}",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -439,7 +439,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_panic_mode{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_panic_mode{configuration_name=\"coingecko-service\"}",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -486,7 +486,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_observed_stable_concurrency{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_observed_stable_concurrency{configuration_name=\"coingecko-service\"}",
           "legendFormat": "observed",
           "range": true,
           "refId": "A"
@@ -496,7 +496,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_target_concurrency_per_pod{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_target_concurrency_per_pod{configuration_name=\"coingecko-service\"}",
           "legendFormat": "target/pod",
           "range": true,
           "refId": "B"
@@ -544,7 +544,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_observed_stable_requests_per_second{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_observed_stable_requests_per_second{configuration_name=\"coingecko-service\"}",
           "legendFormat": "stable rps",
           "range": true,
           "refId": "A"
@@ -554,7 +554,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_panic_request_concurrency{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_panic_request_concurrency{configuration_name=\"coingecko-service\"}",
           "legendFormat": "panic concurrency",
           "range": true,
           "refId": "B"

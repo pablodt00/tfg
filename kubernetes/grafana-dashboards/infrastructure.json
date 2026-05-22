@@ -98,16 +98,6 @@
           "legendFormat": "{{service_name}}",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "sum(rate(http_requests_total{service_name=\"webapp-daemon\"}[1m])) by (service_name)",
-          "legendFormat": "{{service_name}}",
-          "range": true,
-          "refId": "D"
         }
       ]
     },
@@ -176,16 +166,6 @@
           "legendFormat": "{{service_name}}",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "sum(rate(http_requests_total{service_name=\"webapp-daemon\",status_code=~\"5..\"}[1m])) by (service_name)",
-          "legendFormat": "{{service_name}}",
-          "range": true,
-          "refId": "D"
         }
       ]
     },
@@ -266,16 +246,6 @@
           "legendFormat": "processor-daemon",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service_name=\"webapp-daemon\"}[5m])) by (le))",
-          "legendFormat": "webapp-daemon",
-          "range": true,
-          "refId": "D"
         }
       ]
     },
@@ -342,7 +312,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-service\"}",
           "legendFormat": "coingecko-api-daemon",
           "range": true,
           "refId": "B"
@@ -352,7 +322,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_actual_pods{configuration_name=\"processor-daemon\"}",
+          "expr": "autoscaler_actual_pods{configuration_name=\"processor-service\"}",
           "legendFormat": "processor-daemon",
           "range": true,
           "refId": "C"
@@ -420,7 +390,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-api-daemon\"}",
+          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-service\"}",
           "legendFormat": "coingecko-api-daemon",
           "range": true,
           "refId": "B"
@@ -430,7 +400,7 @@
             "type": "prometheus",
             "uid": "ff9qt6ns2x340f"
           },
-          "expr": "autoscaler_requested_pods{configuration_name=\"processor-daemon\"}",
+          "expr": "autoscaler_requested_pods{configuration_name=\"processor-service\"}",
           "legendFormat": "processor-daemon",
           "range": true,
           "refId": "C"
@@ -524,16 +494,6 @@
           "legendFormat": "processor-daemon",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "rate(process_cpu_seconds_total{service_name=\"webapp-daemon\"}[1m])",
-          "legendFormat": "webapp-daemon",
-          "range": true,
-          "refId": "D"
         }
       ]
     },
@@ -602,16 +562,6 @@
           "legendFormat": "processor-daemon",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "process_resident_memory_bytes{service_name=\"webapp-daemon\"}",
-          "legendFormat": "webapp-daemon",
-          "range": true,
-          "refId": "D"
         }
       ]
     },
@@ -786,5 +736,5 @@
   "timezone": "browser",
   "title": "Infrastructure Dashboard",
   "uid": "infrastructure-dashboard",
-  "version": 3
+  "version": 4
 }
