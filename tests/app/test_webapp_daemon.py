@@ -4,7 +4,9 @@ from app.webapp_daemon import (
     COIN_NAME_TO_SYMBOL,
     DEFAULT_COINS_DATA,
     fetch_coins_data,
+    fetch_coins_raw,
     send_alert,
+    _change_color,
 )
 
 
@@ -121,3 +123,49 @@ def test_send_alert_uses_correct_symbol():
 
         payload = mock_post.call_args.kwargs["json"]
         assert payload["coin"] == "doge"
+
+
+@patch("app.webapp_daemon.requests.get")
+def test_fetch_coins_raw_success(mock_get):
+    mock_response = MagicMock()
+    mock_response.json.return_value = [{"coin": "btc", "last_price": 50000.0,
+                                        "price_1_min_change_percent": 0.5,
+                                        "price_5_min_change_percent": 1.2}]
+    mock_response.raise_for_status = MagicMock()
+    mock_get.return_value = mock_response
+
+    result = fetch_coins_raw()
+
+    assert result is not None
+    assert result[0]["coin"] == "btc"
+
+
+@patch("app.webapp_daemon.requests.get")
+def test_fetch_coins_raw_error_returns_none(mock_get):
+    mock_get.side_effect = Exception("connection error")
+
+    result = fetch_coins_raw()
+
+    assert result is None
+
+
+def test_change_color_positive():
+    html = _change_color("1.5%")
+    assert "#2ecc71" in html
+    assert "▲" in html
+
+
+def test_change_color_negative():
+    html = _change_color("-2.3%")
+    assert "#e74c3c" in html
+    assert "▼" in html
+
+
+def test_change_color_dash():
+    html = _change_color("-")
+    assert "—" in html
+
+
+def test_change_color_zero():
+    html = _change_color("0.0%")
+    assert "#2ecc71" in html
