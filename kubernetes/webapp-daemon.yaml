@@ -7,8 +7,10 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/minScale: "1"
-        autoscaling.knative.dev/maxScale: "3"
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/max-scale: "3"
+        autoscaling.knative.dev/target: "100"
+        autoscaling.knative.dev/metric: "concurrency"
     spec:
       containers:
         - image: DOCKER_USER/tfg:latest

@@ -1,0 +1,154 @@
+LOCUST_FILE  ?= tests/load/locustfile.py
+API_HOST     ?= http://localhost:8080
+REPORT_DIR   ?= tests/load/reports
+LOCUST_LOG   ?= --loglevel INFO
+LOCUST_RUN = docker run --rm -i -v $$PWD:/srv -w /srv --network host tfg bash -c
+
+$(shell mkdir -p $(REPORT_DIR))
+
+# ---------------------------------------------------------------------------
+# Prueba 1 – Carga Sostenida
+# 50 usuarios, 30 minutos, carga mixta constante.
+# ---------------------------------------------------------------------------
+load-test-sustained:
+	@echo "==> Prueba 1: Carga Sostenida (50 users, 30 min)"
+	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) SustainedLoadUser \
+		--host $(API_HOST) \
+		--users 50 \
+		--spawn-rate 5 \
+		--run-time 30m \
+		--headless \
+		$(LOCUST_LOG) \
+		--html $(REPORT_DIR)/prueba1-carga-sostenida.html \
+		--csv $(REPORT_DIR)/prueba1-carga-sostenida"
+
+# ---------------------------------------------------------------------------
+# Prueba 2 – Pico de Carga
+# 15 minutos: 10 → 200 → 10 usuarios (controlled by SpikeLoadShape).
+# ---------------------------------------------------------------------------
+load-test-spike:
+	@echo "==> Prueba 2: Pico de Carga (10 → 200 → 10 users, 15 min)"
+	$(LOCUST_RUN) "locust -f tests/load/shapes/spike.py \
+		--host $(API_HOST) \
+		--headless \
+		--run-time 15m \
+		$(LOCUST_LOG) \
+		--html $(REPORT_DIR)/prueba2-pico-carga.html \
+		--csv $(REPORT_DIR)/prueba2-pico-carga"
+
+# ---------------------------------------------------------------------------
+# Prueba 3 – Cold Start
+# Espera 10 minutos (inactividad para permitir scale-to-zero),
+# luego envía 50 peticiones simultáneas.
+# ---------------------------------------------------------------------------
+load-test-coldstart:
+	@echo "==> Prueba 3: Cold Start"
+	@echo "    Esperando 10 minutos para que los pods escalen a 0..."
+	@echo "    (Requiere min-scale: '0' en el Knative Service)"
+	sleep 600
+	@echo "    Enviando 50 peticiones simultáneas..."
+	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) ColdStartUser \
+		--host $(API_HOST) \
+		--users 50 \
+		--spawn-rate 50 \
+		--run-time 5m \
+		--headless \
+		$(LOCUST_LOG) \
+		--html $(REPORT_DIR)/prueba3-cold-start.html \
+		--csv $(REPORT_DIR)/prueba3-cold-start"
+
+# ---------------------------------------------------------------------------
+# Prueba 4 – Procesamiento de Eventos
+# 1 hora de tráfico ligero para observar el pipeline completo.
+# ---------------------------------------------------------------------------
+load-test-events:
+	@echo "==> Prueba 4: Procesamiento de Eventos (1h, tráfico ligero)"
+	@echo "    Monitoriza en Grafana: http://localhost:3000"
+	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) EventProcessingUser \
+		--host $(API_HOST) \
+		--users 20 \
+		--spawn-rate 2 \
+		--run-time 60m \
+		--headless \
+		$(LOCUST_LOG) \
+		--html $(REPORT_DIR)/prueba4-procesamiento-eventos.html \
+		--csv $(REPORT_DIR)/prueba4-procesamiento-eventos"
+
+# ---------------------------------------------------------------------------
+# Prueba 5 – Resiliencia
+# 30 minutos de carga sostenida + inyección de fallos manual.
+# ---------------------------------------------------------------------------
+load-test-resilience:
+	@echo "==> Prueba 5: Resiliencia (50 users, 30 min)"
+	@echo "    Inyectar fallos en otra terminal con:"
+	@echo "      make load-test-kill-pod"
+	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) ResilienceUser \
+		--host $(API_HOST) \
+		--users 50 \
+		--spawn-rate 5 \
+		--run-time 30m \
+		--headless \
+		$(LOCUST_LOG) \
+		--html $(REPORT_DIR)/prueba5-resiliencia.html \
+		--csv $(REPORT_DIR)/prueba5-resiliencia"
+
+load-test-kill-pod:
+	@echo "==> Matando pod aleatorio de api-daemon..."
+	kubectl delete pod \
+		$(shell kubectl get pods -l serving.knative.dev/service=api-daemon \
+			--field-selector=status.phase=Running \
+			-o jsonpath='{.items[0].metadata.name}')
+
+# ---------------------------------------------------------------------------
+# Prueba 6 – Escalado Horizontal
+# 45 minutos: ramp lineal 10 → 300 usuarios (30 min), luego 300 → 10 (15 min).
+# ---------------------------------------------------------------------------
+load-test-scaling:
+	@echo "==> Prueba 6: Escalado Horizontal (10 → 300 → 10 users, 45 min)"
+	$(LOCUST_RUN) "locust -f tests/load/shapes/scaling.py \
+		--host $(API_HOST) \
+		--headless \
+		--run-time 45m \
+		$(LOCUST_LOG) \
+		--html $(REPORT_DIR)/prueba6-escalado-horizontal.html \
+		--csv $(REPORT_DIR)/prueba6-escalado-horizontal"
+
+# ---------------------------------------------------------------------------
+# Modo UI – Abre la interfaz web de Locust
+# ---------------------------------------------------------------------------
+load-test-ui:
+	@echo "==> Locust Web UI en http://localhost:8089"
+	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) --host $(API_HOST) --web-port 8089"
+
+# ---------------------------------------------------------------------------
+# Suite completa (ejecuta todas las pruebas secuencialmente)
+# ~3h30min en total
+# ---------------------------------------------------------------------------
+load-test-all: load-test-sustained load-test-spike load-test-events \
+               load-test-resilience load-test-scaling
+	@echo "==> Todas las pruebas de carga completadas."
+	@echo "    Informes disponibles en $(REPORT_DIR)/"
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+# Show current status of Knative services
+load-test-status:
+	@echo "==> Estado de los Knative Services:"
+	kubectl get ksvc
+	@echo ""
+	@echo "==> Pods activos:"
+	kubectl get pods -l 'serving.knative.dev/service in (api-daemon,processor-service,webapp-daemon,coingecko-api-daemon)'
+
+# Clean reports directory
+load-test-clean:
+	rm -rf $(REPORT_DIR)
+	mkdir -p $(REPORT_DIR)
+
+.PHONY: load-test-sustained load-test-spike load-test-coldstart load-test-events \
+        load-test-resilience load-test-scaling load-test-ui load-test-all \
+        load-test-status load-test-kill-pod load-test-clean
+
+
+
