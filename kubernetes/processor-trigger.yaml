@@ -5,6 +5,16 @@ metadata:
   namespace: default
 spec:
   broker: kafka-broker
+  delivery:
+    backoffPolicy: exponential
+    backoffDelay: "PT1S"
+    retry: 4
+    # deadLetterSink:
+    #   ref:
+    #     apiVersion: serving.knative.dev/v1
+    #     kind: Service
+    #     name: dlq-handler
+    #     namespace: default
   subscriber:
     ref:
       apiVersion: serving.knative.dev/v1

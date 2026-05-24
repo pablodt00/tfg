@@ -262,5 +262,85 @@ DB_HOST: "postgresql-service.default.svc.cluster.local"
 make precommit
 ```
 
+## Pruebas de Carga (Load Testing)
+
+Las pruebas de carga se realizan con [Locust](https://locust.io/) y están diseñadas para ejecutarse contra el sistema desplegado en Kubernetes.
+
+### Requisitos
+
+Locust está incluido en la imagen Docker del proyecto (`requirements/requirements.txt`).
+No es necesario instalarlo en el host. Los comandos `make load-test-*` ejecutan locust
+dentro del contenedor Docker con `--network host` para poder alcanzar el port-forward.
+
+### Acceso desde fuera del cluster
+
+Locust se ejecuta **fuera del cluster Kubernetes** y accede a la API mediante `kubectl port-forward`. Esto es perfectamente válido para pruebas de carga: el tráfico entra al cluster a través del pod de destino, Knative detecta la carga y escala los servicios igual que en producción.
+
+```bash
+# Terminal 1 – mantener el port-forward activo
+make k8s-api-forward   # API en http://localhost:8080
+```
+
+### Comandos disponibles
+
+| Comando | Descripción | Duración |
+|---|---|---|
+| `make load-test-sustained` | Prueba 1 – Carga sostenida (50 users) | 30 min |
+| `make load-test-spike` | Prueba 2 – Pico de carga (10→200→10 users) | 15 min |
+| `make load-test-coldstart` | Prueba 3 – Cold start (idle + burst de 50) | ~15 min |
+| `make load-test-events` | Prueba 4 – Procesamiento de eventos (pipeline) | 60 min |
+| `make load-test-resilience` | Prueba 5 – Resiliencia (50 users + fault injection) | 30 min |
+| `make load-test-scaling` | Prueba 6 – Escalado horizontal (10→300→10 users) | 45 min |
+| `make load-test-ui` | Modo UI interactivo en http://localhost:8089 | manual |
+| `make load-test-all` | Suite completa secuencial | ~3h 30min |
+| `make load-test-status` | Estado de Knative Services y pods activos | — |
+
+```bash
+# Ejemplo: ejecutar la prueba de carga sostenida
+make load-test-sustained
+
+# Personalizar host (por defecto http://localhost:8080)
+make load-test-sustained API_HOST=http://mi-host:8080
+```
+
+Los informes HTML y CSV se generan automáticamente en `tests/load/reports/`.
+
+### Estructura de archivos de prueba
+
+```
+tests/load/
+  locustfile.py          # Clases de usuario (SustainedLoadUser, ColdStartUser, etc.)
+  shapes/
+    spike.py             # LoadTestShape para Prueba 2 (pico de carga)
+    scaling.py           # LoadTestShape para Prueba 6 (escalado horizontal)
+```
+
+> **Nota sobre `LoadTestShape`**: Locust sólo permite una shape activa por invocación.
+> Por eso las pruebas con rampas de carga (Pruebas 2 y 6) viven en ficheros separados.
+
+### Políticas de Orquestación (casos de estudio)
+
+Las pruebas deben ejecutarse para cada política definida en `docs/casos_estudio.md`.
+Para cambiar de política, editar las anotaciones del Knative Service correspondiente y re-desplegar:
+
+```bash
+# Editar kubernetes/api-daemon.yaml con los valores de la política deseada
+kubectl apply -f kubernetes/api-daemon.yaml
+kubectl apply -f kubernetes/processor-daemon.yaml
+# ... etc.
+```
+
+#### Notas de implementación Knative
+
+| Campo en casos_estudio.md | Campo real en Kubernetes | Recurso |
+|---|---|---|
+| `parallelism` (eventing delivery) | `consumers` | `kafka-source.yaml` |
+| `deadLetterSink.ref.name: dlq-handler` | Requiere desplegar un servicio `dlq-handler` | `processor-trigger.yaml` |
+| `autoscaling.knative.dev/minScale` | `autoscaling.knative.dev/min-scale` | Anotaciones del Knative Service |
+
+- **`parallelism`** en la spec de `delivery` de un `Trigger`/`Broker` **no es un campo válido** en la API de Knative Eventing. El paralelismo de consumidores se controla en `KafkaSource` mediante el campo `consumers` (ver `kubernetes/kafka-source.yaml`).
+- **`deadLetterSink`** para la Política D requiere que exista un servicio `dlq-handler` desplegado. Está comentado en `kubernetes/processor-trigger.yaml` hasta que se cree dicho servicio.
+- La anotación correcta es `min-scale` (con guión), no `minScale` — ambas son aceptadas por Knative pero `min-scale` es el estándar oficial.
+
 ## Autor
 Pablo Durán

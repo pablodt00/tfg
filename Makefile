@@ -14,3 +14,4 @@ include makefiles/knative.mk
 include makefiles/monitoring.mk
 include makefiles/processor-daemon.mk
 include makefiles/webapp-daemon.mk
+include makefiles/load-tests.mk
