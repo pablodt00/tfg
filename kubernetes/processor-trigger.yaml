@@ -7,8 +7,8 @@ spec:
   broker: kafka-broker
   delivery:
     backoffPolicy: exponential
-    backoffDelay: "PT1S"
-    retry: 4
+    backoffDelay: "PT0.5S"
+    retry: 3
     # deadLetterSink:
     #   ref:
     #     apiVersion: serving.knative.dev/v1

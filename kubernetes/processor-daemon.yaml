@@ -7,11 +7,13 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/min-scale: "1"
-        autoscaling.knative.dev/max-scale: "3"
+        autoscaling.knative.dev/min-scale: "3"
+        autoscaling.knative.dev/max-scale: "10"
+        autoscaling.knative.dev/target: "50"
+        autoscaling.knative.dev/scale-down-delay: "30s"
         autoscaling.knative.dev/metric: "concurrency"
-        autoscaling.knative.dev/target: "10"
     spec:
+      containerConcurrency: 50
       containers:
         - name: processor-service
           image: DOCKER_USER/tfg:latest
@@ -29,11 +31,11 @@ spec:
                 name: tfg-config
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
               cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           livenessProbe:
             httpGet:
               path: /health/ping
