@@ -7,11 +7,15 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/min-scale: "1"
-        autoscaling.knative.dev/max-scale: "3"
-        autoscaling.knative.dev/metric: "concurrency"
-        autoscaling.knative.dev/target: "10"
+        autoscaling.knative.dev/min-scale: "2"
+        autoscaling.knative.dev/max-scale: "15"
+        autoscaling.knative.dev/target: "80"
+        autoscaling.knative.dev/scale-down-delay: "5m"
+        autoscaling.knative.dev/metric: "rps"
+        autoscaling.knative.dev/panic-window-percentage: "20"
+        autoscaling.knative.dev/panic-threshold-percentage: "200"
     spec:
+      containerConcurrency: 80
       containers:
         - name: coingecko-service
           image: DOCKER_USER/tfg:latest
@@ -29,11 +33,11 @@ spec:
                 name: tfg-config
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              cpu: "300m"
+              memory: "384Mi"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              cpu: "800m"
+              memory: "896Mi"
           livenessProbe:
             httpGet:
               path: /health/ping
