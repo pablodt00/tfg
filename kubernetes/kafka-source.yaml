@@ -9,7 +9,7 @@ spec:
   topics:
     - coingecko-prices.updates
   consumerGroup: coingecko-consumer-group
-  consumers: 1
+  consumers: 4
   sink:
     ref:
       apiVersion: eventing.knative.dev/v1
