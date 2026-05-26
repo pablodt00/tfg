@@ -25,7 +25,7 @@ Contiene el código fuente de la aplicación, organizado en módulos:
 - **`processor/`**: Procesador de eventos de criptomonedas y notificaciones
   - `processor_daemon.py`: Daemon de procesamiento que recibe CloudEvents
   - `processor_service.py`: Lógica de procesamiento y gestión de alertas
-  - `email_service.py`: Servicio de envío de emails con SendGrid
+  - `email_service.py`: Servicio de envío de emails con Resend
   - `endpoints/`: Endpoints para recibir eventos y health checks
 
 - **`common/`**: Módulos compartidos
@@ -103,9 +103,9 @@ Documentación del proyecto:
 - Kubernetes (kind)
 - Make
 - Cuenta de Docker Hub
-- Cuenta de SendGrid (para envío de emails)
+- Cuenta de Resend (para envío de emails)
 - Modificación de `DOCKER_USER` por nombre de usuario de Docker Hub en todo el proyecto
-- Modificación de `SENDGRID_API_KEY` en `kubernetes/configmap.yaml`
+- Modificación de `RESEND_API_KEY` en `kubernetes/configmap.yaml`
 - Modificación de `COINGECKO_API_KEY` en `kubernetes/configmap.yaml`
 
 ### Ejecución
@@ -249,8 +249,8 @@ Las principales variables se configuran en `kubernetes/configmap.yaml`:
 ```yaml
 KAFKA_BOOTSTRAP_SERVERS: "redpanda.kafka.svc.cluster.local:9092"
 COINGECKO_KAFKA_TOPIC: "coingecko-prices.updates"
-SENDGRID_API_KEY: "tu-api-key"
-FROM_EMAIL: "tu-email@ejemplo.com"
+RESEND_API_KEY: "api-key"
+FROM_EMAIL: "email@ejemplo.com"
 DB_HOST: "postgresql-service.default.svc.cluster.local"
 # ... más variables
 ```
