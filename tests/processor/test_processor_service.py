@@ -10,7 +10,7 @@ from processor.processor_service import ProcessorService
 
 def make_service():
     settings = MagicMock()
-    settings.SENDGRID_API_KEY = "test-key"
+    settings.RESEND_API_KEY = "test-key"
     settings.FROM_EMAIL = "from@test.com"
     coin_repo = AsyncMock()
     alert_repo = AsyncMock()

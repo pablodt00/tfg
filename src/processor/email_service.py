@@ -1,14 +1,15 @@
 # pylint: disable=too-many-arguments, too-many-positional-arguments, broad-exception-caught
+import asyncio
+
+import resend
 import structlog
-from async_sendgrid import SendgridAPI
-from sendgrid.helpers.mail import Mail
 
 default_logger = structlog.get_logger()
 
 
 class EmailService:
     def __init__(self, api_key: str, from_email: str, logger=default_logger):
-        self.client = SendgridAPI(api_key)
+        resend.api_key = api_key
         self.from_email = from_email
         self.logger = logger
 
@@ -24,29 +25,21 @@ class EmailService:
             f"Threshold: €{threshold}"
         )
 
-        message = Mail(
-            from_email=self.from_email,
-            to_emails=[to_email],
-            subject=subject,
-            plain_text_content=content,
-        )
+        params: resend.Emails.SendParams = {
+            "from": self.from_email,
+            "to": [to_email],
+            "subject": subject,
+            "text": content,
+        }
 
         try:
-            response = await self.client.send(message)
-            if response.status_code in (200, 202):
-                self.logger.info(
-                    "Email sent successfully",
-                    status_code=response.status_code,
-                    to=to_email,
-                )
-                return True
-
-            self.logger.error(
-                "Failed to send email",
-                status_code=response.status_code,
+            response = await asyncio.to_thread(resend.Emails.send, params)
+            self.logger.info(
+                "Email sent successfully",
+                id=response["id"],
                 to=to_email,
             )
-            return False
+            return True
         except Exception as e:
             self.logger.error("Failed to send email", error=str(e), to=to_email)
             return False
