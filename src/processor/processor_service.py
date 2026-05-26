@@ -37,7 +37,7 @@ class ProcessorService:
         self.session_factory = session_factory
         self.logger = logger
         self.email_service = EmailService(
-            api_key=self.settings.SENDGRID_API_KEY,
+            api_key=self.settings.RESEND_API_KEY,
             from_email=self.settings.FROM_EMAIL,
         )
 
