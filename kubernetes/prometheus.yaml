@@ -68,6 +68,21 @@ data:
         target_label: __address__
         regex: ([^:]+)(?::\d+)?
         replacement: $1:8000
+      # Map Knative service names to the service_name used in application metrics
+      # so that process_cpu_seconds_total and process_resident_memory_bytes
+      # are filterable by service_name in Grafana dashboards.
+      - source_labels: [__meta_kubernetes_pod_label_serving_knative_dev_service]
+        regex: api-daemon
+        target_label: service_name
+        replacement: api-daemon
+      - source_labels: [__meta_kubernetes_pod_label_serving_knative_dev_service]
+        regex: coingecko-service
+        target_label: service_name
+        replacement: coingecko-api-daemon
+      - source_labels: [__meta_kubernetes_pod_label_serving_knative_dev_service]
+        regex: processor-service
+        target_label: service_name
+        replacement: processor-daemon
       metrics_path: /metrics
     - job_name: 'knative-autoscaler'
       kubernetes_sd_configs:
@@ -85,3 +100,19 @@ data:
         regex: ([^:]+)(?::\d+)?
         replacement: $1:9090
       metrics_path: /metrics
+    - job_name: 'redpanda'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - kafka
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: redpanda
+      - source_labels: [__address__]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?
+        replacement: $1:9644
+      metrics_path: /public_metrics

@@ -1036,6 +1036,79 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "Kafka Consumer Group Lag",
+      "description": "Mensajes pendientes de consumir. Bajo en Pol\u00edtica A (3 consumers), puede acumularse en Pol\u00edtica B (1 consumer). Depende del scrape de RedPanda (puerto 9644).",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ff9qt6ns2x340f"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ff9qt6ns2x340f"
+          },
+          "expr": "redpanda_kafka_consumer_group_lag{group=\"coingecko-consumer-group\"}",
+          "legendFormat": "lag [partition {{partition}}]",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "preload": false,
