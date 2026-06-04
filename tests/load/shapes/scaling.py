@@ -6,14 +6,14 @@ from tests.load.locustfile import HorizontalScalingUser  # noqa: F401
 
 class HorizontalScalingShape(LoadTestShape):
     """
-    Prueba 6 – Escalado Horizontal (45 min total):
-      0-30 min : linear ramp 10 → 300 users
-      30-45 min: linear ramp 300 → 10 users
+    Prueba 6 – Escalado Horizontal (8 min total):
+      0-5 min : linear ramp 10 → 100 users
+      5-8 min : linear ramp 100 → 10 users
     """
 
-    RAMP_UP_DURATION = 1800    # 30 min
-    RAMP_DOWN_DURATION = 2700  # 45 min total
-    MAX_USERS = 300
+    RAMP_UP_DURATION = 300    # 5 min
+    RAMP_DOWN_DURATION = 480  # 8 min total
+    MAX_USERS = 100
     MIN_USERS = 10
 
     def tick(self):

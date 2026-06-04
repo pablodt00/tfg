@@ -3,10 +3,16 @@
 ## Descripción del Sistema
 
 El sistema procesa datos de criptomonedas con los siguientes componentes:
-- **coingecko-api-daemon**: Obtención de datos cada 60s y publicación en Kafka
-- **processor-daemon**: Procesamiento de eventos, cálculo de cambios temporales y envío de alertas
-- **api-daemon**: API backend para el frontend
-- **webapp-daemon**: Interfaz de usuario
+- **coingecko-service**: Obtención de datos cada 60s y publicación en Kafka. Triggereado por PingSource (1 evento/min, tráfico fijo).
+- **processor-service**: Procesamiento de CloudEvents de Kafka, evaluación de alertas, envío de emails.
+- **api-daemon**: API REST consumida por la webapp y los tests de carga (tráfico variable de usuarios).
+- **webapp-daemon**: Interfaz Streamlit. Configuración base fija entre políticas (`min-scale: "1"`, `max-scale: "3"`).
+
+Las políticas se aplican principalmente a **api-daemon** (tráfico de usuarios HTTP) y **processor-service** (pipeline de eventos). El coingecko-service mantiene `min-scale: "1"` en todas las políticas al tener carga fija y predecible.
+
+El paralelismo en el pipeline de eventing se controla con el campo `consumers` en `KafkaSource` (`kafka-source.yaml`). La entrega del Trigger controla reintentos y backoff, no el paralelismo.
+
+---
 
 ## Políticas de Orquestación
 
@@ -14,7 +20,7 @@ El sistema procesa datos de criptomonedas con los siguientes componentes:
 
 **Objetivo**: Minimizar el tiempo de respuesta extremo a extremo del sistema.
 
-**Configuración Knative Serving**:
+**Configuración api-daemon** (`api-daemon.yaml`):
 ```yaml
 spec:
   template:
@@ -23,52 +29,78 @@ spec:
         autoscaling.knative.dev/min-scale: "3"
         autoscaling.knative.dev/max-scale: "10"
         autoscaling.knative.dev/target: "50"
-        autoscaling.knative.dev/scale-down-delay: "30s"
+        autoscaling.knative.dev/scale-down-delay: "60s"
         autoscaling.knative.dev/metric: "concurrency"
     spec:
+      containerConcurrency: 50
       containers:
       - resources:
           requests:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: "300m"
+            memory: "256Mi"
           limits:
-            cpu: "1000m"
-            memory: "1Gi"
-      containerConcurrency: 50
+            cpu: "800m"
+            memory: "512Mi"
 ```
 
-**Configuración Knative Eventing**:
+**Configuración processor-service** (`processor-daemon.yaml`):
+```yaml
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/min-scale: "2"
+        autoscaling.knative.dev/max-scale: "5"
+        autoscaling.knative.dev/target: "5"
+        autoscaling.knative.dev/scale-down-delay: "60s"
+        autoscaling.knative.dev/metric: "concurrency"
+    spec:
+      containerConcurrency: 5
+      containers:
+      - resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+```
+
+**Configuración KafkaSource** (`kafka-source.yaml`):
+```yaml
+spec:
+  consumers: 3
+```
+
+**Configuración Trigger** (`processor-trigger.yaml`):
 ```yaml
 spec:
   delivery:
     backoffPolicy: exponential
     backoffDelay: "PT0.5S"
     retry: 3
-  parallelism: 5
 ```
 
 **Características**:
-- Mínimo 3 réplicas siempre activas (sin cold starts)
-- Escalado agresivo con target bajo (50 peticiones concurrentes)
-- Delay de scale-down de 30s para evitar fluctuaciones
+- Mínimo 3 réplicas de api-daemon siempre activas (sin cold starts en API)
+- Mínimo 2 réplicas de processor (procesamiento inmediato de eventos)
+- Target bajo (50): escala pronto antes de que cada pod se sature
+- 3 consumidores Kafka en paralelo para baja latencia en el pipeline
 - Recursos generosos por pod
-- Paralelismo alto en procesamiento de eventos
 
-**Métricas Relevantes**:
-- `latency_p50`, `latency_p95`, `latency_p99` (percentiles de latencia)
-- `cold_start_count` (debe ser 0)
-- `request_duration_seconds`
-- `event_processing_duration_seconds`
-- `queue_depth` (profundidad de cola Kafka)
-- `alert_delivery_time` (tiempo desde detección hasta envío)
+**Métricas objetivo**:
+- `request_duration_seconds` p50 < 100ms, p95 < 300ms
+- `cold_start_count` = 0
+- Pod count api-daemon: siempre ≥ 3
+- Kafka consumer lag ≈ 0
 
 ---
 
 ### Política B: Eficiencia de Recursos
 
-**Objetivo**: Maximizar la utilización de recursos y minimizar costes.
+**Objetivo**: Minimizar consumo de recursos; scale-to-zero cuando no hay tráfico.
 
-**Configuración Knative Serving**:
+**Configuración api-daemon**:
 ```yaml
 spec:
   template:
@@ -76,54 +108,81 @@ spec:
       annotations:
         autoscaling.knative.dev/min-scale: "0"
         autoscaling.knative.dev/max-scale: "5"
-        autoscaling.knative.dev/target: "200"
-        autoscaling.knative.dev/scale-down-delay: "10m"
+        autoscaling.knative.dev/target: "150"
+        autoscaling.knative.dev/scale-down-delay: "30s"
         autoscaling.knative.dev/metric: "concurrency"
-        autoscaling.knative.dev/scale-to-zero-pod-retention-period: "5m"
+        autoscaling.knative.dev/scale-to-zero-pod-retention-period: "30s"
     spec:
+      containerConcurrency: 150
       containers:
       - resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "50m"
+            memory: "64Mi"
           limits:
-            cpu: "500m"
-            memory: "512Mi"
-      containerConcurrency: 200
+            cpu: "250m"
+            memory: "256Mi"
 ```
 
-**Configuración Knative Eventing**:
+**Configuración processor-service**:
+```yaml
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/min-scale: "0"
+        autoscaling.knative.dev/max-scale: "3"
+        autoscaling.knative.dev/target: "10"
+        autoscaling.knative.dev/scale-down-delay: "30s"
+        autoscaling.knative.dev/metric: "concurrency"
+        autoscaling.knative.dev/scale-to-zero-pod-retention-period: "30s"
+    spec:
+      containerConcurrency: 10
+      containers:
+      - resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+```
+
+**Configuración KafkaSource**:
+```yaml
+spec:
+  consumers: 1
+```
+
+**Configuración Trigger**:
 ```yaml
 spec:
   delivery:
     backoffPolicy: exponential
     backoffDelay: "PT2S"
     retry: 5
-  parallelism: 1
 ```
 
 **Características**:
-- Scale-to-zero habilitado
-- Target alto de concurrencia (200)
+- Scale-to-zero en api-daemon y processor: 0 pods en reposo
 - Recursos mínimos por pod
-- Scale-down lento (10 minutos)
-- Procesamiento secuencial de eventos
+- Scale-down rápido (30s) para liberar recursos cuanto antes
+- Un único consumidor Kafka (procesamiento secuencial)
+- Más reintentos para compensar cold starts en la cadena de entrega
 
-**Métricas Relevantes**:
-- `cpu_utilization_percent` (debe estar >70%)
-- `memory_utilization_percent` (debe estar >70%)
-- `pod_count` (número de réplicas activas)
-- `cost_per_transaction` (recursos consumidos / peticiones)
-- `cold_start_count` y `cold_start_duration`
-- `resource_waste_ratio` (capacidad no utilizada)
+**Métricas objetivo**:
+- Pod count: ≈ 0 en reposo, escala solo bajo demanda
+- CPU/memoria totales: mínimos fuera de ráfagas
+- `cold_start_duration`: latencia añadida en la primera petición tras inactividad
+- `request_duration_seconds` p95 (esperable mayor que Política A)
 
 ---
 
 ### Política C: Balanceada
 
-**Objetivo**: Compromiso entre latencia y eficiencia de recursos.
+**Objetivo**: Compromiso equilibrado entre latencia y uso de recursos.
 
-**Configuración Knative Serving**:
+**Configuración api-daemon**:
 ```yaml
 spec:
   template:
@@ -132,53 +191,78 @@ spec:
         autoscaling.knative.dev/min-scale: "1"
         autoscaling.knative.dev/max-scale: "8"
         autoscaling.knative.dev/target: "100"
-        autoscaling.knative.dev/scale-down-delay: "2m"
+        autoscaling.knative.dev/scale-down-delay: "120s"
         autoscaling.knative.dev/metric: "concurrency"
         autoscaling.knative.dev/target-utilization-percentage: "70"
     spec:
+      containerConcurrency: 100
       containers:
       - resources:
           requests:
-            cpu: "250m"
-            memory: "256Mi"
+            cpu: "150m"
+            memory: "128Mi"
           limits:
-            cpu: "750m"
-            memory: "768Mi"
-      containerConcurrency: 100
+            cpu: "500m"
+            memory: "384Mi"
 ```
 
-**Configuración Knative Eventing**:
+**Configuración processor-service**:
+```yaml
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/max-scale: "4"
+        autoscaling.knative.dev/target: "10"
+        autoscaling.knative.dev/scale-down-delay: "120s"
+        autoscaling.knative.dev/metric: "concurrency"
+    spec:
+      containerConcurrency: 10
+      containers:
+      - resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "384Mi"
+```
+
+**Configuración KafkaSource**:
+```yaml
+spec:
+  consumers: 2
+```
+
+**Configuración Trigger**:
 ```yaml
 spec:
   delivery:
     backoffPolicy: exponential
     backoffDelay: "PT1S"
     retry: 4
-  parallelism: 3
 ```
 
 **Características**:
-- Mínimo 1 réplica (cold starts ocasionales)
-- Target moderado (100)
-- Recursos equilibrados
-- Scale-down moderado (2 minutos)
-- Paralelismo medio
+- 1 réplica mínima (cold starts solo en réplicas adicionales al escalar)
+- Target del 70% de utilización: escala antes de saturar cada pod
+- 2 consumidores Kafka: paralelismo moderado
+- Scale-down de 2 minutos: sin fluctuaciones bruscas
 
-**Métricas Relevantes**:
-- `latency_p95` (objetivo: <500ms)
-- `cpu_utilization_percent` (objetivo: 50-70%)
-- `memory_utilization_percent` (objetivo: 50-70%)
-- `throughput_requests_per_second`
-- `pod_count` y `scaling_events_count`
-- `cost_efficiency_score` (throughput / recursos)
+**Métricas objetivo**:
+- `request_duration_seconds` p95 < 500ms
+- CPU en carga sostenida: 50–70%
+- Pod count api-daemon: 1–4 réplicas según carga
+- Throughput RPS relativo al número de pods activos
 
 ---
 
-### Política D: Alta Disponibilidad y Resiliencia
+### Política D: Alta Disponibilidad
 
-**Objetivo**: Garantizar disponibilidad del sistema ante picos de carga y fallos.
+**Objetivo**: Máxima resiliencia ante picos de carga y fallos de pods.
 
-**Configuración Knative Serving**:
+**Configuración api-daemon**:
 ```yaml
 spec:
   template:
@@ -187,103 +271,112 @@ spec:
         autoscaling.knative.dev/min-scale: "2"
         autoscaling.knative.dev/max-scale: "15"
         autoscaling.knative.dev/target: "80"
-        autoscaling.knative.dev/scale-down-delay: "5m"
+        autoscaling.knative.dev/scale-down-delay: "300s"
         autoscaling.knative.dev/metric: "rps"
         autoscaling.knative.dev/panic-window-percentage: "20"
         autoscaling.knative.dev/panic-threshold-percentage: "200"
     spec:
+      containerConcurrency: 80
       containers:
       - resources:
           requests:
-            cpu: "300m"
-            memory: "384Mi"
+            cpu: "200m"
+            memory: "256Mi"
           limits:
-            cpu: "800m"
-            memory: "896Mi"
-      containerConcurrency: 80
+            cpu: "600m"
+            memory: "512Mi"
 ```
 
-**Configuración Knative Eventing**:
+**Configuración processor-service**:
+```yaml
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/min-scale: "2"
+        autoscaling.knative.dev/max-scale: "8"
+        autoscaling.knative.dev/target: "5"
+        autoscaling.knative.dev/scale-down-delay: "300s"
+        autoscaling.knative.dev/metric: "concurrency"
+    spec:
+      containerConcurrency: 5
+      containers:
+      - resources:
+          requests:
+            cpu: "150m"
+            memory: "256Mi"
+          limits:
+            cpu: "400m"
+            memory: "512Mi"
+```
+
+**Configuración KafkaSource**:
+```yaml
+spec:
+  consumers: 3
+```
+
+**Configuración Trigger**:
 ```yaml
 spec:
   delivery:
     backoffPolicy: exponential
     backoffDelay: "PT1S"
     retry: 8
-    deadLetterSink:
-      ref:
-        kind: Service
-        name: dlq-handler
-  parallelism: 4
+    # deadLetterSink requiere desplegar el servicio dlq-handler previamente
+    # deadLetterSink:
+    #   ref:
+    #     apiVersion: serving.knative.dev/v1
+    #     kind: Service
+    #     name: dlq-handler
 ```
 
 **Características**:
-- Mínimo 2 réplicas para redundancia
-- Métrica basada en RPS (requests per second)
-- Panic mode configurado para escalado rápido ante picos
-- Máximo alto de réplicas (15)
-- Reintentos abundantes y Dead Letter Queue
-- Paralelismo alto
+- Mínimo 2 réplicas en api y processor (redundancia activa)
+- Métrica RPS en api-daemon: más predictivo que concurrencia ante picos súbitos
+- Panic mode: si las peticiones se duplican en 20s, escala inmediatamente sin esperar la ventana estable
+- 8 reintentos en Trigger para garantizar entrega ante fallos transitorios
+- Scale-down lento (5 min) para absorber picos sin incurrir en cold starts
 
-**Métricas Relevantes**:
-- `availability_percent` (objetivo: >99.5%)
-- `error_rate` (debe ser <0.5%)
-- `retry_count` y `dlq_messages_count`
-- `scaling_velocity` (rapidez de escalado)
-- `recovery_time_seconds` (tras fallos)
-- `concurrent_requests_peak`
-- `queue_latency` (tiempo en cola Kafka)
+**Métricas objetivo**:
+- Tasa de errores HTTP 5xx < 1% incluso durante kill de pod
+- Pod count: siempre ≥ 2, escala rápido ante pico súbito
+- Tiempo de recuperación observable en error rate tras `make load-test-kill-pod`
+- Reintentos del Trigger (visible en logs del processor)
 
 ---
 
-## Conjunto de Pruebas Estándar
+## Conjunto de Pruebas
 
-Las siguientes pruebas deben ejecutarse para **todas las políticas**:
+Las pruebas se ejecutan para cada política con `make load-test-*`. Cada prueba genera un informe HTML en `tests/load/reports/`.
 
-### 1. Prueba de Carga Sostenida
-- **Duración**: 30 minutos
-- **Descripción**: Carga constante de consultas al API y creación de alertas
-- **Configuración**:
-  - 50 usuarios concurrentes
-  - Creación de 10 alertas/minuto
-  - Consultas a diferentes endpoints del API
-  
-### 2. Prueba de Pico de Carga
-- **Duración**: 15 minutos
-- **Descripción**: Incremento súbito de carga
-- **Configuración**:
-  - Inicio: 10 usuarios
-  - Pico (min 5-10): 200 usuarios
-  - Descenso: vuelta a 10 usuarios
+### 1. Carga Sostenida (8 min)
+- **Descripción**: Carga constante para verificar comportamiento en estado estable y capacidad de escalado sostenido
+- **Configuración**: 30 usuarios concurrentes, mix de GET /coins y POST /alerts
+- **Comando**: `make load-test-sustained`
 
-### 3. Prueba de Cold Start
-- **Duración**: 20 minutos
-- **Descripción**: Medir comportamiento tras inactividad
-- **Configuración**:
-  - 10 minutos sin tráfico
-  - Envío de 50 peticiones simultáneas
-  - Medir primera respuesta
+### 2. Pico de Carga (5 min)
+- **Descripción**: Ráfaga súbita para medir velocidad de escalado y recuperación
+- **Configuración**: 10 → 80 → 10 usuarios (1 min baseline, 2 min pico, 2 min recuperación)
+- **Comando**: `make load-test-spike`
 
-### 4. Prueba de Procesamiento de Eventos
-- **Duración**: 1 hora
-- **Descripción**: Verificar procesamiento completo del pipeline
-- **Configuración**:
-  - Frecuencia normal del cronjob (60s)
-  - 100 alertas configuradas en BD
-  - Monitorizar cola Kafka y envío de emails
+### 3. Cold Start (≈4 min)
+- **Descripción**: Medir latencia de primera petición tras inactividad
+- **Configuración**: 2 min de espera para permitir scale-to-zero, luego 20 peticiones simultáneas durante 2 min
+- **Nota**: Principalmente diferenciadora en Política B (min-scale=0). En otras políticas mide la latencia de arranque de réplicas adicionales.
+- **Comando**: `make load-test-coldstart`
 
-### 5. Prueba de Resiliencia
-- **Duración**: 30 minutos
-- **Descripción**: Inyección de fallos
-- **Configuración**:
-  - Simular caída de pods (kill aleatorio)
-  - Latencia artificial en API externa (500ms-2s)
-  - Errores HTTP 5xx en 5% de peticiones
+### 4. Procesamiento de Eventos (10 min)
+- **Descripción**: Observar el pipeline completo a frecuencia normal del CronJob (1 evento/min)
+- **Configuración**: 10 usuarios en AlertHeavyBehavior para poblar alertas en BD mientras el pipeline procesa
+- **Comando**: `make load-test-events`
 
-### 6. Prueba de Escalado Horizontal
-- **Duración**: 45 minutos
-- **Descripción**: Carga incremental para forzar escalado
-- **Configuración**:
-  - Incremento lineal: 10 → 300 usuarios en 30 min
-  - Descenso: 300 → 10 usuarios en 15 min
+### 5. Resiliencia (8 min)
+- **Descripción**: Carga sostenida con kill de pod a mitad de prueba para medir recuperación
+- **Configuración**: 20 usuarios; ejecutar `make load-test-kill-pod` en el minuto 4
+- **Comando**: `make load-test-resilience`
 
+### 6. Escalado Horizontal (8 min)
+- **Descripción**: Rampa lineal para observar el comportamiento del autoescalado
+- **Configuración**: 10 → 100 usuarios en 5 min, luego 100 → 10 en 3 min
+- **Comando**: `make load-test-scaling`

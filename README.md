@@ -285,14 +285,14 @@ make k8s-api-forward   # API en http://localhost:8080
 
 | Comando | Descripción | Duración |
 |---|---|---|
-| `make load-test-sustained` | Prueba 1 – Carga sostenida (50 users) | 30 min |
-| `make load-test-spike` | Prueba 2 – Pico de carga (10→200→10 users) | 15 min |
-| `make load-test-coldstart` | Prueba 3 – Cold start (idle + burst de 50) | ~15 min |
-| `make load-test-events` | Prueba 4 – Procesamiento de eventos (pipeline) | 60 min |
-| `make load-test-resilience` | Prueba 5 – Resiliencia (50 users + fault injection) | 30 min |
-| `make load-test-scaling` | Prueba 6 – Escalado horizontal (10→300→10 users) | 45 min |
+| `make load-test-sustained` | Prueba 1 – Carga sostenida (30 users) | 8 min |
+| `make load-test-spike` | Prueba 2 – Pico de carga (10→80→10 users) | 5 min |
+| `make load-test-coldstart` | Prueba 3 – Cold start (idle 2 min + burst de 20) | ~4 min |
+| `make load-test-events` | Prueba 4 – Procesamiento de eventos (pipeline) | 10 min |
+| `make load-test-resilience` | Prueba 5 – Resiliencia (20 users + kill pod) | 8 min |
+| `make load-test-scaling` | Prueba 6 – Escalado horizontal (10→100→10 users) | 8 min |
 | `make load-test-ui` | Modo UI interactivo en http://localhost:8089 | manual |
-| `make load-test-all` | Suite completa secuencial | ~3h 30min |
+| `make load-test-all` | Suite completa secuencial | ~47 min |
 | `make load-test-status` | Estado de Knative Services y pods activos | — |
 
 ```bash

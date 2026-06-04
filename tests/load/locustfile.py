@@ -86,7 +86,7 @@ class AlertHeavyBehavior(TaskSet):
 
 
 class SustainedLoadUser(HttpUser):
-    """Prueba 1: Carga Sostenida – 50 usuarios concurrentes, 30 minutos."""
+    """Prueba 1: Carga Sostenida – 30 usuarios concurrentes, 8 minutos."""
 
     tasks = [StandardAPIBehavior]
     wait_time = between(1, 3)
@@ -107,8 +107,7 @@ class ColdStartUser(HttpUser):
 
 
 class EventProcessingUser(HttpUser):
-    """Prueba 4: Procesamiento de Eventos – tráfico
-    ligero mientras el pipeline trabaja."""
+    """Prueba 4: Procesamiento de Eventos – 10 usuarios ligeros, 10 minutos."""
 
     tasks = [AlertHeavyBehavior]
     wait_time = between(3, 8)
@@ -116,7 +115,7 @@ class EventProcessingUser(HttpUser):
 
 
 class ResilienceUser(HttpUser):
-    """Prueba 5: Resiliencia – carga sostenida mientras se inyectan fallos."""
+    """Prueba 5: Resiliencia – 20 usuarios, 8 minutos, kill de pod en el minuto 4."""
 
     tasks = [StandardAPIBehavior]
     wait_time = between(1, 3)

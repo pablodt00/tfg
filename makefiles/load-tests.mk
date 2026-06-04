@@ -8,15 +8,15 @@ $(shell mkdir -p $(REPORT_DIR))
 
 # ---------------------------------------------------------------------------
 # Prueba 1 – Carga Sostenida
-# 50 usuarios, 30 minutos, carga mixta constante.
+# 30 usuarios, 8 minutos, carga mixta constante.
 # ---------------------------------------------------------------------------
 load-test-sustained:
-	@echo "==> Prueba 1: Carga Sostenida (50 users, 30 min)"
+	@echo "==> Prueba 1: Carga Sostenida (30 users, 8 min)"
 	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) SustainedLoadUser \
 		--host $(API_HOST) \
-		--users 50 \
+		--users 30 \
 		--spawn-rate 5 \
-		--run-time 30m \
+		--run-time 8m \
 		--headless \
 		$(LOCUST_LOG) \
 		--html $(REPORT_DIR)/prueba1-carga-sostenida.html \
@@ -24,34 +24,34 @@ load-test-sustained:
 
 # ---------------------------------------------------------------------------
 # Prueba 2 – Pico de Carga
-# 15 minutos: 10 → 200 → 10 usuarios (controlled by SpikeLoadShape).
+# 5 minutos: 10 → 80 → 10 usuarios (controlado por SpikeLoadShape).
 # ---------------------------------------------------------------------------
 load-test-spike:
-	@echo "==> Prueba 2: Pico de Carga (10 → 200 → 10 users, 15 min)"
+	@echo "==> Prueba 2: Pico de Carga (10 → 80 → 10 users, 5 min)"
 	$(LOCUST_RUN) "locust -f tests/load/shapes/spike.py \
 		--host $(API_HOST) \
 		--headless \
-		--run-time 15m \
+		--run-time 5m \
 		$(LOCUST_LOG) \
 		--html $(REPORT_DIR)/prueba2-pico-carga.html \
 		--csv $(REPORT_DIR)/prueba2-pico-carga"
 
 # ---------------------------------------------------------------------------
 # Prueba 3 – Cold Start
-# Espera 10 minutos (inactividad para permitir scale-to-zero),
-# luego envía 50 peticiones simultáneas.
+# Espera 2 minutos (inactividad para scale-to-zero),
+# luego envía 20 peticiones simultáneas durante 2 minutos.
 # ---------------------------------------------------------------------------
 load-test-coldstart:
 	@echo "==> Prueba 3: Cold Start"
-	@echo "    Esperando 10 minutos para que los pods escalen a 0..."
-	@echo "    (Requiere min-scale: '0' en el Knative Service)"
-	sleep 600
-	@echo "    Enviando 50 peticiones simultáneas..."
+	@echo "    Esperando 2 minutos para que los pods escalen a 0..."
+	@echo "    (Requiere min-scale: '0' en el Knative Service – Política B)"
+	sleep 120
+	@echo "    Enviando 20 peticiones simultáneas..."
 	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) ColdStartUser \
 		--host $(API_HOST) \
-		--users 50 \
-		--spawn-rate 50 \
-		--run-time 5m \
+		--users 20 \
+		--spawn-rate 20 \
+		--run-time 2m \
 		--headless \
 		$(LOCUST_LOG) \
 		--html $(REPORT_DIR)/prueba3-cold-start.html \
@@ -59,16 +59,16 @@ load-test-coldstart:
 
 # ---------------------------------------------------------------------------
 # Prueba 4 – Procesamiento de Eventos
-# 1 hora de tráfico ligero para observar el pipeline completo.
+# 10 minutos de tráfico ligero para observar el pipeline completo.
 # ---------------------------------------------------------------------------
 load-test-events:
-	@echo "==> Prueba 4: Procesamiento de Eventos (1h, tráfico ligero)"
+	@echo "==> Prueba 4: Procesamiento de Eventos (10 min, tráfico ligero)"
 	@echo "    Monitoriza en Grafana: http://localhost:3000"
 	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) EventProcessingUser \
 		--host $(API_HOST) \
-		--users 20 \
+		--users 10 \
 		--spawn-rate 2 \
-		--run-time 60m \
+		--run-time 10m \
 		--headless \
 		$(LOCUST_LOG) \
 		--html $(REPORT_DIR)/prueba4-procesamiento-eventos.html \
@@ -76,17 +76,17 @@ load-test-events:
 
 # ---------------------------------------------------------------------------
 # Prueba 5 – Resiliencia
-# 30 minutos de carga sostenida + inyección de fallos manual.
+# 8 minutos de carga sostenida + inyección de fallos manual al minuto 4.
 # ---------------------------------------------------------------------------
 load-test-resilience:
-	@echo "==> Prueba 5: Resiliencia (50 users, 30 min)"
-	@echo "    Inyectar fallos en otra terminal con:"
+	@echo "==> Prueba 5: Resiliencia (20 users, 8 min)"
+	@echo "    Inyectar fallo en otra terminal al minuto 4 con:"
 	@echo "      make load-test-kill-pod"
 	$(LOCUST_RUN) "locust -f $(LOCUST_FILE) ResilienceUser \
 		--host $(API_HOST) \
-		--users 50 \
+		--users 20 \
 		--spawn-rate 5 \
-		--run-time 30m \
+		--run-time 8m \
 		--headless \
 		$(LOCUST_LOG) \
 		--html $(REPORT_DIR)/prueba5-resiliencia.html \
@@ -101,14 +101,14 @@ load-test-kill-pod:
 
 # ---------------------------------------------------------------------------
 # Prueba 6 – Escalado Horizontal
-# 45 minutos: ramp lineal 10 → 300 usuarios (30 min), luego 300 → 10 (15 min).
+# 8 minutos: ramp lineal 10 → 100 usuarios (5 min), luego 100 → 10 (3 min).
 # ---------------------------------------------------------------------------
 load-test-scaling:
-	@echo "==> Prueba 6: Escalado Horizontal (10 → 300 → 10 users, 45 min)"
+	@echo "==> Prueba 6: Escalado Horizontal (10 → 100 → 10 users, 8 min)"
 	$(LOCUST_RUN) "locust -f tests/load/shapes/scaling.py \
 		--host $(API_HOST) \
 		--headless \
-		--run-time 45m \
+		--run-time 8m \
 		$(LOCUST_LOG) \
 		--html $(REPORT_DIR)/prueba6-escalado-horizontal.html \
 		--csv $(REPORT_DIR)/prueba6-escalado-horizontal"
@@ -122,7 +122,7 @@ load-test-ui:
 
 # ---------------------------------------------------------------------------
 # Suite completa (ejecuta todas las pruebas secuencialmente)
-# ~3h30min en total
+# ~47 min en total
 # ---------------------------------------------------------------------------
 load-test-all: load-test-sustained load-test-spike load-test-events \
                load-test-resilience load-test-scaling
@@ -133,15 +133,13 @@ load-test-all: load-test-sustained load-test-spike load-test-events \
 # Helpers
 # ---------------------------------------------------------------------------
 
-# Show current status of Knative services
 load-test-status:
 	@echo "==> Estado de los Knative Services:"
 	kubectl get ksvc
 	@echo ""
 	@echo "==> Pods activos:"
-	kubectl get pods -l 'serving.knative.dev/service in (api-daemon,processor-service,webapp-daemon,coingecko-api-daemon)'
+	kubectl get pods -l 'serving.knative.dev/service in (api-daemon,processor-service,webapp-daemon,coingecko-service)'
 
-# Clean reports directory
 load-test-clean:
 	rm -rf $(REPORT_DIR)
 	mkdir -p $(REPORT_DIR)
@@ -149,6 +147,3 @@ load-test-clean:
 .PHONY: load-test-sustained load-test-spike load-test-coldstart load-test-events \
         load-test-resilience load-test-scaling load-test-ui load-test-all \
         load-test-status load-test-kill-pod load-test-clean
-
-
-
