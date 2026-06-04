@@ -39,7 +39,7 @@ class CrudRepository(Generic[T]):
     async def add(self, model: T, session: AsyncSession) -> T:
         db_data = self.sql_alchemy_model(**model.model_dump())  # type: ignore
         session.add(db_data)
-        await session.commit()
+        await session.flush()
 
         await session.refresh(db_data)
 
@@ -54,7 +54,7 @@ class CrudRepository(Generic[T]):
         if db_data is None:
             raise RecordNotFound(f"Entity not found for id {entity_id}")
         await session.delete(db_data)
-        await session.commit()
+        await session.flush()
 
     async def update(self, entity_id: int, model: T, session: AsyncSession) -> T:
         stmt = select(self.sql_alchemy_model).where(
@@ -65,10 +65,10 @@ class CrudRepository(Generic[T]):
         if not stored_data:
             raise RecordNotFound(f"Entity not found for id {entity_id}")
 
-        for key, value in model.model_dump(exclude={"id"}).items():
+        for key, value in model.model_dump(exclude={"id", "updated_at"}).items():
             setattr(stored_data, key, value)
 
-        await session.commit()
+        await session.flush()
         await session.refresh(stored_data)
 
         result_obj: T = self.schema.model_validate(stored_data)

@@ -1,6 +1,6 @@
 PROJECT ?= tfg
 COMPOSE_FILE=docker/docker-compose.yml
-DC=docker-compose -p ${PROJECT} -f ${COMPOSE_FILE}
+DC=docker compose -p ${PROJECT} -f ${COMPOSE_FILE}
 DOCKERFILE=docker/Dockerfile
 DOCKER_USER=DOCKER_USER
 

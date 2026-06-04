@@ -46,7 +46,7 @@ async def test_execute_calls_coingecko_and_publishes():
 
     with patch("gateway.coingecko_service.CoinGeckoClient") as mock_client_cls:
         mock_client = AsyncMock()
-        mock_client.get_coins_price_py_id = AsyncMock(return_value=mock_coin_data)
+        mock_client.get_coins_price_by_id = AsyncMock(return_value=mock_coin_data)
         mock_client_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client_cls.return_value.__aexit__ = AsyncMock(return_value=False)
 

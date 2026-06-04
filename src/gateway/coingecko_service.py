@@ -45,7 +45,7 @@ class CoinGeckoAPIService:
         try:
             with coingecko_api_request_duration_seconds.time():
                 async with CoinGeckoClient(settings=self.settings) as client:
-                    coin_price_data = await client.get_coins_price_py_id(
+                    coin_price_data = await client.get_coins_price_by_id(
                         coin_price_data=CoinPriceByIdEndpoint.get_default_request(),
                     )
             self.logger.info(
