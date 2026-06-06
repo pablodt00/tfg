@@ -1,5 +1,5 @@
 LOCUST_FILE  ?= tests/load/locustfile.py
-API_HOST     ?= http://localhost:8080
+API_HOST     ?= http://localhost:7654
 REPORT_DIR   ?= tests/load/reports
 LOCUST_LOG   ?= --loglevel INFO
 LOCUST_RUN = docker run --rm -i -v $$PWD:/srv -w /srv --network host tfg bash -c
