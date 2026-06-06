@@ -13,4 +13,4 @@ k8s-api-status:
 	kubectl get pods -l serving.knative.dev/service=api-daemon
 
 k8s-api-forward:
-	kubectl port-forward --address 0.0.0.0 deployment/api-daemon-00001-deployment 8080:8000
+	kubectl port-forward --address 0.0.0.0 deployment/api-daemon-00001-deployment 7654:7654
