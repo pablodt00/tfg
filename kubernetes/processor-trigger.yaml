@@ -8,7 +8,7 @@ spec:
   delivery:
     backoffPolicy: exponential
     backoffDelay: "PT1S"
-    retry: 4
+    retry: 8
     # deadLetterSink:
     #   ref:
     #     apiVersion: serving.knative.dev/v1
