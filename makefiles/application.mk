@@ -3,7 +3,6 @@ tfg:
 	make k8s-setup
 	@sleep 5
 	make k8s-monitoring-deploy k8s-db-deploy k8s-kafka-deploy
-	@sleep 60
 	@echo "✅ Prometheus & Grafana deployed"
 	make k8s-kafka-create-topic TOPIC=coingecko-prices.updates
 	make k8s-kafka-broker-setup
