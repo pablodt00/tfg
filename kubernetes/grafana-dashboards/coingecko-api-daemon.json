@@ -3,10 +3,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
+        "datasource": {"type": "grafana", "uid": "-- Grafana --"},
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -24,776 +21,177 @@
     {
       "id": 1,
       "type": "row",
-      "title": "HTTP Traffic",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
+      "title": "CoinGecko External API",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
       "collapsed": false
     },
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Request Rate (req/s)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 1
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
+      "title": "CoinGecko API Call Rate (calls/s)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 1},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
       "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
+        "defaults": {"unit": "reqps", "color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}},
         "overrides": []
       },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "rate(http_requests_total{service_name=\"coingecko-api-daemon\"}[1m])",
-          "legendFormat": "{{method}} {{endpoint}} {{status_code}}",
-          "range": true,
-          "refId": "A"
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "rate(coingecko_api_requests_total[1m])",
+          "legendFormat": "calls/s", "range": true, "refId": "A"
         }
       ]
     },
     {
       "id": 3,
       "type": "timeseries",
-      "title": "Error Rate (5xx req/s)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
+      "title": "CoinGecko API Call Latency",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 1},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
       "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
+        "defaults": {"unit": "s", "color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}},
         "overrides": []
       },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "rate(http_requests_total{service_name=\"coingecko-api-daemon\",status_code=~\"5..\"}[1m])",
-          "legendFormat": "{{method}} {{endpoint}}",
-          "range": true,
-          "refId": "A"
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "histogram_quantile(0.50, sum by(le)(rate(coingecko_api_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p50", "range": true, "refId": "A"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "histogram_quantile(0.95, sum by(le)(rate(coingecko_api_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95", "range": true, "refId": "B"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "histogram_quantile(0.99, sum by(le)(rate(coingecko_api_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p99", "range": true, "refId": "C"
         }
       ]
     },
     {
       "id": 4,
       "type": "row",
-      "title": "Latency",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
+      "title": "Autoscaler",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9},
       "collapsed": false
     },
     {
       "id": 5,
-      "type": "timeseries",
-      "title": "Request Latency Percentiles",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 10
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
+      "type": "stat",
+      "title": "Active Pods",
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 10},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
+          "unit": "short",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": 0}, {"color": "red", "value": 80}]}
         },
         "overrides": []
       },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto"},
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{service_name=\"coingecko-api-daemon\"}[5m]))",
-          "legendFormat": "p50",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service_name=\"coingecko-api-daemon\"}[5m]))",
-          "legendFormat": "p95",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service_name=\"coingecko-api-daemon\"}[5m]))",
-          "legendFormat": "p99",
-          "range": true,
-          "refId": "C"
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-service\"}",
+          "legendFormat": "__auto", "refId": "A"
         }
       ]
     },
     {
       "id": 6,
-      "type": "row",
-      "title": "Concurrency & Scaling",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 18
-      },
-      "collapsed": false
-    },
-    {
-      "id": 7,
       "type": "stat",
-      "title": "Requests In Progress",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 19
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
+      "title": "Desired Pods",
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 10},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": 0}, {"color": "red", "value": 80}]}
         },
         "overrides": []
       },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "orientation": "auto"
-      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto"},
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "sum(http_requests_in_progress{service_name=\"coingecko-api-daemon\"})",
-          "legendFormat": "__auto",
-          "refId": "A"
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-service\"}",
+          "legendFormat": "__auto", "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Actual vs Desired Pods",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+      "fieldConfig": {
+        "defaults": {"unit": "short", "color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}},
+        "overrides": []
+      },
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-service\"}",
+          "legendFormat": "actual", "range": true, "refId": "A"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-service\"}",
+          "legendFormat": "desired", "range": true, "refId": "B"
         }
       ]
     },
     {
       "id": 8,
-      "type": "stat",
-      "title": "Active Pods (Knative)",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 19
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "orientation": "auto"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_actual_pods{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "__auto",
-          "refId": "A"
-        }
-      ]
+      "type": "row",
+      "title": "Resources",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 22},
+      "collapsed": false
     },
     {
       "id": 9,
-      "type": "stat",
-      "title": "Desired Pods (Knative)",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 19
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
+      "type": "timeseries",
+      "title": "CPU Usage",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 23},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
       "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
+        "defaults": {"unit": "percentunit", "color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}},
         "overrides": []
       },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "orientation": "auto"
-      },
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_requested_pods{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "__auto",
-          "refId": "A"
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "sum(rate(process_cpu_seconds_total{service_name=\"coingecko-api-daemon\"}[1m]))",
+          "legendFormat": "cpu", "range": true, "refId": "A"
         }
       ]
     },
     {
       "id": 10,
-      "type": "stat",
-      "title": "Panic Mode Active",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 19
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "orientation": "auto"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_panic_mode{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "__auto",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 11,
       "type": "timeseries",
-      "title": "Knative Concurrency (observed vs target)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 23
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
+      "title": "Memory Usage RSS",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 23},
+      "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
       "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
+        "defaults": {"unit": "bytes", "color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2}},
         "overrides": []
       },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_observed_stable_concurrency{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "observed",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_target_concurrency_per_pod{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "target/pod",
-          "range": true,
-          "refId": "B"
-        }
-      ]
-    },
-    {
-      "id": 12,
-      "type": "timeseries",
-      "title": "Knative RPS (observed)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 23
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_observed_stable_requests_per_second{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "stable rps",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "autoscaler_panic_request_concurrency{configuration_name=\"coingecko-service\"}",
-          "legendFormat": "panic concurrency",
-          "range": true,
-          "refId": "B"
-        }
-      ]
-    },
-    {
-      "id": 13,
-      "type": "row",
-      "title": "Resource Usage",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 31
-      },
-      "collapsed": false
-    },
-    {
-      "id": 14,
-      "type": "timeseries",
-      "title": "CPU Usage",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 32
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "rate(process_cpu_seconds_total{service_name=\"coingecko-api-daemon\"}[1m])",
-          "legendFormat": "cpu",
-          "range": true,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 15,
-      "type": "timeseries",
-      "title": "Memory Usage (RSS)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 32
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "process_resident_memory_bytes{service_name=\"coingecko-api-daemon\"}",
-          "legendFormat": "rss",
-          "range": true,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 16,
-      "type": "row",
-      "title": "CoinGecko External API",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 40
-      },
-      "collapsed": false
-    },
-    {
-      "id": 17,
-      "type": "timeseries",
-      "title": "CoinGecko API Call Rate",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 41
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "rate(coingecko_api_requests_total[1m])",
-          "legendFormat": "calls/s",
-          "range": true,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 18,
-      "type": "timeseries",
-      "title": "CoinGecko API Call Latency",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 41
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ff9qt6ns2x340f"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.50, rate(coingecko_api_request_duration_seconds_bucket[5m]))",
-          "legendFormat": "p50",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.95, rate(coingecko_api_request_duration_seconds_bucket[5m]))",
-          "legendFormat": "p95",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff9qt6ns2x340f"
-          },
-          "expr": "histogram_quantile(0.99, rate(coingecko_api_request_duration_seconds_bucket[5m]))",
-          "legendFormat": "p99",
-          "range": true,
-          "refId": "C"
+          "datasource": {"type": "prometheus", "uid": "ff9qt6ns2x340f"},
+          "expr": "sum(process_resident_memory_bytes{service_name=\"coingecko-api-daemon\"})",
+          "legendFormat": "rss", "range": true, "refId": "A"
         }
       ]
     }
@@ -801,16 +199,11 @@
   "preload": false,
   "schemaVersion": 42,
   "tags": [],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
   "timepicker": {},
   "timezone": "browser",
   "title": "CoinGecko API Daemon Dashboard",
   "uid": "coingecko-api-daemon-dashboard",
-  "version": 3
+  "version": 4
 }

@@ -177,13 +177,6 @@ st.markdown(
             margin-bottom: 1rem;
         }
 
-        .alert-card {
-            background: #1a1d2e;
-            border: 1px solid #2a2d3e;
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-        }
-
         div[data-testid="stDataFrame"] { border-radius: 8px; overflow: hidden; }
         .stTabs [data-baseweb="tab"] { color: #8892a4; }
         .stTabs [aria-selected="true"] { color: #f0b429 !important; }
@@ -293,63 +286,60 @@ with tab2:
             unsafe_allow_html=True,
         )
 
-        st.markdown('<div class="alert-card">', unsafe_allow_html=True)
+        with st.container(border=True):
+            left, right = st.columns(2)
 
-        left, right = st.columns(2)
-
-        with left:
-            email = st.text_input("📧 Email Address", placeholder="you@example.com")
-            selected_coin = st.selectbox(
-                "🪙 Cryptocurrency", list(COIN_NAME_TO_SYMBOL.keys())
-            )
-
-        with right:
-            operator = st.selectbox(
-                "⚖️ Condition",
-                [">=", "<="],
-                format_func=lambda x: (
-                    "Price rises to or above  ≥"
-                    if x == ">="
-                    else "Price drops to or below  ≤"
-                ),
-            )
-            amount = st.number_input(
-                "🎯 Target Price (EUR)",
-                min_value=0.0,
-                step=1.0,
-                format="%.4f",
-                placeholder="e.g. 50000.00",
-            )
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        btn_col, info_col = st.columns([1, 3])
-        with btn_col:
-            submit = st.button(
-                "🔔 Set Alert", use_container_width=True, type="primary"
-            )
-        with info_col:
-            st.markdown(
-                "<p style='color:#8892a4;font-size:0.85rem;margin-top:0.6rem'>"
-                "You will receive an email when the price condition is met.</p>",
-                unsafe_allow_html=True,
-            )
-
-        if submit:
-            if email and selected_coin and amount:
-                operator_text = (
-                    "GREATER_THAN_OR_EQUAL"
-                    if operator == ">="
-                    else "LESS_THAN_OR_EQUAL"
+            with left:
+                email = st.text_input("📧 Email Address", placeholder="you@example.com")
+                selected_coin = st.selectbox(
+                    "🪙 Cryptocurrency", list(COIN_NAME_TO_SYMBOL.keys())
                 )
-                if send_alert(
-                    email, selected_coin, operator_text, amount, default_logger
-                ):
-                    st.success(
-                        f"✅ Alert created! You'll be notified at **{email}** when "
-                        f"**{selected_coin}** is **{operator} €{amount:,.4f}**"
-                    )
-            else:
-                st.warning("⚠️ Please fill in all fields before submitting.")
 
-        st.markdown("</div>", unsafe_allow_html=True)
+            with right:
+                operator = st.selectbox(
+                    "⚖️ Condition",
+                    [">=", "<="],
+                    format_func=lambda x: (
+                        "Price rises to or above  ≥"
+                        if x == ">="
+                        else "Price drops to or below  ≤"
+                    ),
+                )
+                amount = st.number_input(
+                    "🎯 Target Price (EUR)",
+                    min_value=0.0,
+                    step=1.0,
+                    format="%.4f",
+                    placeholder="e.g. 50000.00",
+                )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            btn_col, info_col = st.columns([1, 3])
+            with btn_col:
+                submit = st.button(
+                    "🔔 Set Alert", use_container_width=True, type="primary"
+                )
+            with info_col:
+                st.markdown(
+                    "<p style='color:#8892a4;font-size:0.85rem;margin-top:0.6rem'>"
+                    "You will receive an email when the price condition is met.</p>",
+                    unsafe_allow_html=True,
+                )
+
+            if submit:
+                if email and selected_coin and amount:
+                    operator_text = (
+                        "GREATER_THAN_OR_EQUAL"
+                        if operator == ">="
+                        else "LESS_THAN_OR_EQUAL"
+                    )
+                    if send_alert(
+                        email, selected_coin, operator_text, amount, default_logger
+                    ):
+                        st.success(
+                            f"✅ Alert created! You'll be notified at **{email}** when "
+                            f"**{selected_coin}** is **{operator} €{amount:,.4f}**"
+                        )
+                else:
+                    st.warning("⚠️ Please fill in all fields before submitting.")
