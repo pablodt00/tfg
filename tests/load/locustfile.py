@@ -113,7 +113,6 @@ class EventProcessingUser(HttpUser):
     wait_time = between(3, 8)
 
 
-
 class ResilienceUser(HttpUser):
     """Prueba 5: Resiliencia – 20 usuarios, 8 minutos, kill de pod en el minuto 4."""
 

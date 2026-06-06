@@ -31,11 +31,10 @@ Contiene el código fuente de la aplicación, organizado en módulos:
 - **`common/`**: Módulos compartidos
   - `client/`: Clientes para la API externa de CoinGecko
   - `config/`: Configuración de la aplicación
-  - `consumers/`: Consumidores de Kafka
   - `producers/`: Productores de Kafka para publicar eventos
   - `database/`: Acceso a base de datos con repositorios
   - `observability/`: Métricas de Prometheus y logging estructurado
-  - `schemas/`: Esquemas de datos de base de datos
+  - `schemas/`: Esquemas de datos y validación
 
 ### `kubernetes/`
 Manifiestos de Kubernetes para el despliegue:
@@ -92,8 +91,8 @@ Scripts bash para ejecutar los diferentes daemons con `uvicorn`
 
 ### `docs/`
 Documentación del proyecto:
-- Diagramas de arquitectura
-- Guías de configuración (ej: entorno Kubernetes con Kind)
+- `tfg.drawio` / `tfg.png`: Diagrama de arquitectura del sistema
+- `casos_estudio.md`: Políticas de autoescalado y casos de estudio
 
 ## Inicio Rápido
 
@@ -214,12 +213,11 @@ El sistema sigue una arquitectura basada en eventos con Knative y los siguientes
    - Almacenamiento persistente de:
      - Precios históricos de monedas
      - Alertas de usuarios
-     - Configuración de usuarios
 
 7. **Prometheus \+ Grafana**:
    - Observabilidad y monitoreo
    - Métricas custom de cada servicio
-   - Dashboards preconfigrados
+   - Dashboards preconfigurados
 
 ### Flujo de Datos
 

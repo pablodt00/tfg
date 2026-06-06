@@ -16,13 +16,13 @@ def test_coin_name_to_symbol_contains_bitcoin():
 
 
 def test_default_coins_data_has_all_coins():
-    assert len(DEFAULT_COINS_DATA["Name"]) == len(COIN_NAME_TO_SYMBOL)
+    assert len(DEFAULT_COINS_DATA["Moneda"]) == len(COIN_NAME_TO_SYMBOL)
 
 
 def test_default_coins_data_placeholders():
-    assert all(v == "-" for v in DEFAULT_COINS_DATA["Last Price (€)"])
-    assert all(v == "-" for v in DEFAULT_COINS_DATA["Price Change 1 min"])
-    assert all(v == "-" for v in DEFAULT_COINS_DATA["Price Change 5 mins"])
+    assert all(v == "-" for v in DEFAULT_COINS_DATA["Último precio (€)"])
+    assert all(v == "-" for v in DEFAULT_COINS_DATA["Variación 1 min"])
+    assert all(v == "-" for v in DEFAULT_COINS_DATA["Variación 5 min"])
 
 
 @patch("app.webapp_daemon.requests.get")
@@ -41,10 +41,10 @@ def test_fetch_coins_data_success(mock_get):
 
     result = fetch_coins_data()
 
-    assert result["Name"] == ["Bitcoin"]
-    assert result["Last Price (€)"] == [50000.0]
-    assert result["Price Change 1 min"] == ["0.5%"]
-    assert result["Price Change 5 mins"] == ["1.2%"]
+    assert result["Moneda"] == ["Bitcoin"]
+    assert result["Último precio (€)"] == [50000.0]
+    assert result["Variación 1 min"] == ["0.5%"]
+    assert result["Variación 5 min"] == ["1.2%"]
 
 
 @patch("app.webapp_daemon.requests.get")
@@ -63,8 +63,8 @@ def test_fetch_coins_data_none_change_percent(mock_get):
 
     result = fetch_coins_data()
 
-    assert result["Price Change 1 min"] == ["-"]
-    assert result["Price Change 5 mins"] == ["-"]
+    assert result["Variación 1 min"] == ["-"]
+    assert result["Variación 5 min"] == ["-"]
 
 
 @patch("app.webapp_daemon.st")
