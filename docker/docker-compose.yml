@@ -147,7 +147,7 @@ services:
       service: application
     entrypoint: [ "/srv/app/scripts/api_daemon.sh" ]
     ports:
-      - "8000:8000"
+      - "7654:7654"
 
   webapp-daemon:
     extends:

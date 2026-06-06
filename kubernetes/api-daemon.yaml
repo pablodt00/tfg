@@ -18,7 +18,7 @@ spec:
       containers:
         - image: DOCKER_USER/tfg:latest
           ports:
-            - containerPort: 8000
+            - containerPort: 7654
               protocol: TCP
           env:
             - name: PYTHONPATH
