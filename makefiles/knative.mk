@@ -19,6 +19,8 @@ k8s-setup:
 	kubectl apply -f kubernetes/knative-dns.yaml
 	kubectl wait --for=condition=Available deployment --all -n knative-serving --timeout=300s
 	kubectl wait --for=condition=Available deployment --all -n kourier-system --timeout=300s
+	kubectl patch svc kourier -n kourier-system --type merge \
+		-p '{"spec":{"type":"NodePort","ports":[{"port":80,"nodePort":31080}]}}'
 	@echo "Knative setup complete"
 
 k8s-delete:
