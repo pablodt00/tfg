@@ -9,9 +9,12 @@ spec:
       annotations:
         autoscaling.knative.dev/min-scale: "1"
         autoscaling.knative.dev/max-scale: "3"
-        autoscaling.knative.dev/target: "100"
+        autoscaling.knative.dev/target: "20"
+        autoscaling.knative.dev/target-utilization-percentage: "70"
         autoscaling.knative.dev/metric: "concurrency"
+        autoscaling.knative.dev/scale-down-delay: "120s"
     spec:
+      containerConcurrency: 20
       containers:
         - image: DOCKER_USER/tfg:latest
           ports:
@@ -24,3 +27,10 @@ spec:
             - configMapRef:
                 name: tfg-config
           command: ["/srv/scripts/webapp-daemon.sh"]
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "384Mi"
+              cpu: "300m"
