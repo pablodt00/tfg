@@ -1,7 +1,6 @@
 from http import HTTPStatus
-from http.client import HTTPException
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from api.api_service import APIService
 from common.client.endpoints.base_endpoint import RequestModel

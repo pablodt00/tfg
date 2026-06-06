@@ -6,7 +6,7 @@ Este proyecto es un sistema distribuido para el monitoreo y análisis de criptom
 
 ## Estructura del Proyecto
 
-### 📁 `src/`
+### `src/`
 Contiene el código fuente de la aplicación, organizado en módulos:
 
 - **`api/`**: Daemon y servicio REST API para exponer endpoints HTTP
@@ -31,13 +31,12 @@ Contiene el código fuente de la aplicación, organizado en módulos:
 - **`common/`**: Módulos compartidos
   - `client/`: Clientes para la API externa de CoinGecko
   - `config/`: Configuración de la aplicación
-  - `consumers/`: Consumidores de Kafka
   - `producers/`: Productores de Kafka para publicar eventos
   - `database/`: Acceso a base de datos con repositorios
   - `observability/`: Métricas de Prometheus y logging estructurado
-  - `schemas/`: Esquemas de datos de base de datos
+  - `schemas/`: Esquemas de datos y validación
 
-### 📁 `kubernetes/`
+### `kubernetes/`
 Manifiestos de Kubernetes para el despliegue:
 - **Knative Services** (`*-daemon.yaml`): Servicios serverless con autoescalado
   - `api-daemon.yaml`: Servicio API REST
@@ -62,16 +61,16 @@ Manifiestos de Kubernetes para el despliegue:
   - `knative-dns.yaml`: Configuración DNS para Knative
   - `kind-config.yaml`: Configuración del cluster local
 
-### 📁 `tests/`
+### `tests/`
 Suite de tests unitarios organizados por módulo
 
-### 📁 `docker/`
+### `docker/`
 Configuración de Docker para desarrollo local:
 - `Dockerfile`: Imagen Docker de la aplicación
 - `docker-compose.yml`: Orquestación de servicios
 - `local.env`: Variables de entorno locales
 
-### 📁 `kubernetes/grafana-dashboards/`
+### `kubernetes/grafana-dashboards/`
 Dashboards de Grafana en formato JSON para monitorización:
 - `infrastructure.json`: Dashboard de infraestructura general
 - `api-daemon.json`: Métricas del servicio API
@@ -79,7 +78,7 @@ Dashboards de Grafana en formato JSON para monitorización:
 - `processor-daemon.json`: Métricas del procesador
 - `webapp-daemon.json`: Métricas de la aplicación web
 
-### 📁 `makefiles/`
+### `makefiles/`
 Makefiles modulares para diferentes componentes:
 - Gestión de daemons individuales (deploy, delete, logs, forward, status)
 - Configuración de Kafka y Knative Eventing
@@ -87,13 +86,13 @@ Makefiles modulares para diferentes componentes:
 - Configuración de monitoreo (Prometheus y Grafana)
 - Tareas de desarrollo y testing
 
-### 📁 `scripts/`
+### `scripts/`
 Scripts bash para ejecutar los diferentes daemons con `uvicorn`
 
-### 📁 `docs/`
+### `docs/`
 Documentación del proyecto:
-- Diagramas de arquitectura
-- Guías de configuración (ej: entorno Kubernetes con Kind)
+- `tfg.drawio` / `tfg.png`: Diagrama de arquitectura del sistema
+- `casos_estudio.md`: Políticas de autoescalado y casos de estudio
 
 ## Inicio Rápido
 
@@ -214,12 +213,11 @@ El sistema sigue una arquitectura basada en eventos con Knative y los siguientes
    - Almacenamiento persistente de:
      - Precios históricos de monedas
      - Alertas de usuarios
-     - Configuración de usuarios
 
 7. **Prometheus \+ Grafana**:
    - Observabilidad y monitoreo
    - Métricas custom de cada servicio
-   - Dashboards preconfigrados
+   - Dashboards preconfigurados
 
 ### Flujo de Datos
 
@@ -285,14 +283,14 @@ make k8s-api-forward   # API en http://localhost:8080
 
 | Comando | Descripción | Duración |
 |---|---|---|
-| `make load-test-sustained` | Prueba 1 – Carga sostenida (50 users) | 30 min |
-| `make load-test-spike` | Prueba 2 – Pico de carga (10→200→10 users) | 15 min |
-| `make load-test-coldstart` | Prueba 3 – Cold start (idle + burst de 50) | ~15 min |
-| `make load-test-events` | Prueba 4 – Procesamiento de eventos (pipeline) | 60 min |
-| `make load-test-resilience` | Prueba 5 – Resiliencia (50 users + fault injection) | 30 min |
-| `make load-test-scaling` | Prueba 6 – Escalado horizontal (10→300→10 users) | 45 min |
+| `make load-test-sustained` | Prueba 1 – Carga sostenida (30 users) | 8 min |
+| `make load-test-spike` | Prueba 2 – Pico de carga (10→80→10 users) | 5 min |
+| `make load-test-coldstart` | Prueba 3 – Cold start (idle 2 min + burst de 20) | ~4 min |
+| `make load-test-events` | Prueba 4 – Procesamiento de eventos (pipeline) | 10 min |
+| `make load-test-resilience` | Prueba 5 – Resiliencia (20 users + kill pod) | 8 min |
+| `make load-test-scaling` | Prueba 6 – Escalado horizontal (10→100→10 users) | 8 min |
 | `make load-test-ui` | Modo UI interactivo en http://localhost:8089 | manual |
-| `make load-test-all` | Suite completa secuencial | ~3h 30min |
+| `make load-test-all` | Suite completa secuencial | ~47 min |
 | `make load-test-status` | Estado de Knative Services y pods activos | — |
 
 ```bash

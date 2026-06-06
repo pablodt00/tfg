@@ -10,7 +10,7 @@ class AlertRepository(CrudRepository):
     def __init__(self) -> None:
         super().__init__(AlertModel, Alert)
 
-    async def get_by_coin(self, coin: str, session: AsyncSession) -> list[Alert] | None:
+    async def get_by_coin(self, coin: str, session: AsyncSession) -> list[Alert]:
         result = await session.execute(
             select(self.sql_alchemy_model).where(
                 self.sql_alchemy_model.coin == coin,

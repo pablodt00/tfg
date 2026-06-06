@@ -28,8 +28,8 @@ COIN_EMOJI = {
     "Ethereum": "Ξ",
     "Tether": "₮",
     "XRP": "✕",
-    "BNB": "🔶",
-    "USD Coin": "💵",
+    "BNB": "B",
+    "USD Coin": "$",
     "Solana": "◎",
     "Dogecoin": "Ð",
     "Cardano": "₳",
@@ -37,10 +37,10 @@ COIN_EMOJI = {
 }
 
 DEFAULT_COINS_DATA = {
-    "Name": list(COIN_NAME_TO_SYMBOL.keys()),
-    "Last Price (€)": ["-"] * len(COIN_NAME_TO_SYMBOL),
-    "Price Change 1 min": ["-"] * len(COIN_NAME_TO_SYMBOL),
-    "Price Change 5 mins": ["-"] * len(COIN_NAME_TO_SYMBOL),
+    "Moneda": list(COIN_NAME_TO_SYMBOL.keys()),
+    "Último precio (€)": ["-"] * len(COIN_NAME_TO_SYMBOL),
+    "Variación 1 min": ["-"] * len(COIN_NAME_TO_SYMBOL),
+    "Variación 5 min": ["-"] * len(COIN_NAME_TO_SYMBOL),
 }
 
 
@@ -53,11 +53,11 @@ def fetch_coins_data():
         symbol_to_name = {v: k for k, v in COIN_NAME_TO_SYMBOL.items()}
 
         coins_data = {
-            "Name": [
+            "Moneda": [
                 symbol_to_name.get(coin["coin"], coin["coin"].upper()) for coin in data
             ],
-            "Last Price (€)": [coin["last_price"] for coin in data],
-            "Price Change 1 min": [
+            "Último precio (€)": [coin["last_price"] for coin in data],
+            "Variación 1 min": [
                 (
                     f"{coin['price_1_min_change_percent']}%"
                     if coin["price_1_min_change_percent"] is not None
@@ -65,7 +65,7 @@ def fetch_coins_data():
                 )
                 for coin in data
             ],
-            "Price Change 5 mins": [
+            "Variación 5 min": [
                 (
                     f"{coin['price_5_min_change_percent']}%"
                     if coin["price_5_min_change_percent"] is not None
@@ -76,7 +76,7 @@ def fetch_coins_data():
         }
         return coins_data
     except Exception as e:
-        st.error(f"Error fetching coins data: {str(e)}")
+        st.error(f"Error al obtener los datos de monedas: {str(e)}")
         return DEFAULT_COINS_DATA
 
 
@@ -105,7 +105,7 @@ def send_alert(email, coin, operator, amount, logger):
         response.raise_for_status()
         return True
     except Exception as e:
-        st.error(f"Error setting alert: {str(e)}")
+        st.error(f"Error al crear la alerta: {str(e)}")
         return False
 
 
@@ -125,8 +125,8 @@ def _change_color(value_str: str) -> str:
 
 
 st.set_page_config(
-    page_title="Crypto Alerts Dashboard",
-    page_icon="📈",
+    page_title="Panel de Alertas de Criptomonedas",
+    page_icon="₿",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -177,13 +177,6 @@ st.markdown(
             margin-bottom: 1rem;
         }
 
-        .alert-card {
-            background: #1a1d2e;
-            border: 1px solid #2a2d3e;
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-        }
-
         div[data-testid="stDataFrame"] { border-radius: 8px; overflow: hidden; }
         .stTabs [data-baseweb="tab"] { color: #8892a4; }
         .stTabs [aria-selected="true"] { color: #f0b429 !important; }
@@ -196,14 +189,15 @@ st.markdown(
 st.markdown(
     """
     <div class="dashboard-header">
-        <h1>📈 Crypto Alerts Dashboard</h1>
-        <p>Real-time cryptocurrency prices &amp; custom price alerts</p>
+        <h1>Panel de Alertas de Criptomonedas</h1>
+        <p>Precios de criptomonedas en tiempo real
+        y alertas de precio personalizadas</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-tab1, tab2 = st.tabs(["📊  Prices", "🔔  Set Alert"])
+tab1, tab2 = st.tabs(["Precios", "Crear alerta"])
 
 with tab1:
     _, main_col, _ = st.columns([1, 10, 1])
@@ -211,11 +205,12 @@ with tab1:
         title_col, refresh_col = st.columns([8, 1])
         with title_col:
             st.markdown(
-                '<div class="section-title">Live Cryptocurrency Prices (EUR)</div>',
+                '<div class="section-title">'
+                'Precios de criptomonedas en tiempo real (EUR)</div>',
                 unsafe_allow_html=True,
             )
         with refresh_col:
-            if st.button("⟳ Refresh", use_container_width=True):
+            if st.button("⟳ Actualizar", use_container_width=True):
                 st.rerun()
 
         raw_data = fetch_coins_raw()
@@ -232,14 +227,14 @@ with tab1:
                 delta = coin["price_1_min_change_percent"]
                 with col:
                     st.metric(
-                        label=f"{COIN_EMOJI.get(name, '🪙')} {name}",
+                        label=f"{COIN_EMOJI.get(name, '')} {name}".strip(),
                         value=f"€{price:,.2f}" if price is not None else "—",
                         delta=f"{delta:+.2f}% 1m" if delta is not None else None,
                     )
 
             st.markdown(
                 '<div class="section-title" style="margin-top:1.2rem">'
-                'Full Price Table</div>',
+                'Tabla de precios completa</div>',
                 unsafe_allow_html=True,
             )
 
@@ -249,14 +244,14 @@ with tab1:
             for coin in raw_data:
                 name = symbol_to_name.get(coin["coin"], coin["coin"].upper())
                 rows.append({
-                    "Coin": f"{COIN_EMOJI.get(name, '🪙')} {name}",
-                    "Price (EUR)": (
+                    "Moneda": f"{COIN_EMOJI.get(name, '')} {name}".strip(),
+                    "Precio (EUR)": (
                         coin["last_price"]
                         if isinstance(coin["last_price"], (int, float))
                         else None
                     ),
-                    "Change 1 min (%)": coin["price_1_min_change_percent"],
-                    "Change 5 mins (%)": coin["price_5_min_change_percent"],
+                    "Variación 1 min (%)": coin["price_1_min_change_percent"],
+                    "Variación 5 min (%)": coin["price_5_min_change_percent"],
                 })
 
             df = pd.DataFrame(rows)
@@ -265,15 +260,15 @@ with tab1:
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Coin": st.column_config.TextColumn("Coin", width="medium"),
-                    "Price (EUR)": st.column_config.NumberColumn(
-                        "Price (EUR)", format="€%.4f", width="medium"
+                    "Moneda": st.column_config.TextColumn("Moneda", width="medium"),
+                    "Precio (EUR)": st.column_config.NumberColumn(
+                        "Precio (EUR)", format="€%.4f", width="medium"
                     ),
-                    "Change 1 min (%)": st.column_config.NumberColumn(
-                        "Change 1 min", format="%.2f%%", width="small"
+                    "Variación 1 min (%)": st.column_config.NumberColumn(
+                        "Variación 1 min", format="%.2f%%", width="small"
                     ),
-                    "Change 5 mins (%)": st.column_config.NumberColumn(
-                        "Change 5 mins", format="%.2f%%", width="small"
+                    "Variación 5 min (%)": st.column_config.NumberColumn(
+                        "Variación 5 min", format="%.2f%%", width="small"
                     ),
                 },
             )
@@ -281,7 +276,7 @@ with tab1:
         else:
             coins_data = fetch_coins_data()
             st.warning(
-                "⚠️ Live data unavailable — showing cached/default values."
+                "Datos en tiempo real no disponibles — mostrando valores en caché."
             )
             st.dataframe(coins_data, use_container_width=True)
 
@@ -289,67 +284,70 @@ with tab2:
     _, main_col, _ = st.columns([1, 10, 1])
     with main_col:
         st.markdown(
-            '<div class="section-title">Create a Price Alert</div>',
+            '<div class="section-title">Crear una alerta de precio</div>',
             unsafe_allow_html=True,
         )
 
-        st.markdown('<div class="alert-card">', unsafe_allow_html=True)
+        with st.container(border=True):
+            left, right = st.columns(2)
 
-        left, right = st.columns(2)
-
-        with left:
-            email = st.text_input("📧 Email Address", placeholder="you@example.com")
-            selected_coin = st.selectbox(
-                "🪙 Cryptocurrency", list(COIN_NAME_TO_SYMBOL.keys())
-            )
-
-        with right:
-            operator = st.selectbox(
-                "⚖️ Condition",
-                [">=", "<="],
-                format_func=lambda x: (
-                    "Price rises to or above  ≥"
-                    if x == ">="
-                    else "Price drops to or below  ≤"
-                ),
-            )
-            amount = st.number_input(
-                "🎯 Target Price (EUR)",
-                min_value=0.0,
-                step=1.0,
-                format="%.4f",
-                placeholder="e.g. 50000.00",
-            )
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        btn_col, info_col = st.columns([1, 3])
-        with btn_col:
-            submit = st.button(
-                "🔔 Set Alert", use_container_width=True, type="primary"
-            )
-        with info_col:
-            st.markdown(
-                "<p style='color:#8892a4;font-size:0.85rem;margin-top:0.6rem'>"
-                "You will receive an email when the price condition is met.</p>",
-                unsafe_allow_html=True,
-            )
-
-        if submit:
-            if email and selected_coin and amount:
-                operator_text = (
-                    "GREATER_THAN_OR_EQUAL"
-                    if operator == ">="
-                    else "LESS_THAN_OR_EQUAL"
+            with left:
+                email = st.text_input(
+                    "Correo electrónico", placeholder="usuario@ejemplo.com"
                 )
-                if send_alert(
-                    email, selected_coin, operator_text, amount, default_logger
-                ):
-                    st.success(
-                        f"✅ Alert created! You'll be notified at **{email}** when "
-                        f"**{selected_coin}** is **{operator} €{amount:,.4f}**"
-                    )
-            else:
-                st.warning("⚠️ Please fill in all fields before submitting.")
+                selected_coin = st.selectbox(
+                    "Criptomoneda", list(COIN_NAME_TO_SYMBOL.keys())
+                )
 
-        st.markdown("</div>", unsafe_allow_html=True)
+            with right:
+                operator = st.selectbox(
+                    "Condición",
+                    [">=", "<="],
+                    format_func=lambda x: (
+                        "El precio sube hasta o supera  ≥"
+                        if x == ">="
+                        else "El precio baja hasta o cae por debajo de  ≤"
+                    ),
+                )
+                amount = st.number_input(
+                    "Precio objetivo (EUR)",
+                    min_value=0.0,
+                    step=1.0,
+                    format="%.4f",
+                    placeholder="p. ej. 50000.00",
+                )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            btn_col, info_col = st.columns([1, 3])
+            with btn_col:
+                submit = st.button(
+                    "Crear alerta", use_container_width=True, type="primary"
+                )
+            with info_col:
+                st.markdown(
+                    "<p style='color:#8892a4;font-size:0.85rem;margin-top:0.6rem'>"
+                    "Recibirás un correo electrónico cuando"
+                    " se cumpla la condición de precio.</p>",
+                    unsafe_allow_html=True,
+                )
+
+            if submit:
+                if email and selected_coin and amount:
+                    operator_text = (
+                        "GREATER_THAN_OR_EQUAL"
+                        if operator == ">="
+                        else "LESS_THAN_OR_EQUAL"
+                    )
+                    if send_alert(
+                        email, selected_coin, operator_text, amount, default_logger
+                    ):
+                        st.success(
+                            f"Alerta creada. Recibirás una notificación"
+                            f" en **{email}** cuando "
+                            f"**{selected_coin}** sea **{operator} €{amount:,.4f}**"
+                        )
+                else:
+                    st.warning(
+                        "Por favor, rellena todos los campos antes de continuar."
+                    )

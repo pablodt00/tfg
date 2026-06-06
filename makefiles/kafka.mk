@@ -1,5 +1,6 @@
 k8s-kafka-deploy:
 	kubectl apply -f kubernetes/kafka.yaml
+	kubectl wait --for=condition=Available --timeout=180s deployment/redpanda -n kafka
 
 k8s-kafka-delete:
 	kubectl delete -f kubernetes/kafka.yaml

@@ -1,7 +1,6 @@
 from typing import Dict, Optional
 
 import httpx
-import requests
 import structlog
 from pydantic import ValidationError
 from structlog.typing import FilteringBoundLogger
@@ -51,7 +50,7 @@ class CoinGeckoClient:
         self.logger = logger
 
         self._api_key = settings.COINGECKO_API_KEY
-        self._timeout = settings.COINGECKO_TIMEOUT or 10
+        self._timeout = settings.COINGECKO_TIMEOUT
         self._base_url = settings.COINGECKO_BASE_URL
         self._client = client if client else httpx.AsyncClient()
         self._should_close_client = client is None
@@ -102,13 +101,13 @@ class CoinGeckoClient:
                     raise CoinGeckoAPIError(f"Response validation error: {e}") from e
 
             return response_data
-        except requests.exceptions.Timeout as exc:
+        except httpx.TimeoutException as exc:
             raise CoinGeckoAPIError("CoinGecko timeout exceeded") from exc
-        except requests.exceptions.HTTPError as exc:
+        except httpx.HTTPStatusError as exc:
             raise CoinGeckoAPIError(
-                f"HTTP error {response.status_code}: {response.text}"
+                f"HTTP error {exc.response.status_code}: {exc.response.text}"
             ) from exc
-        except requests.exceptions.RequestException as exc:
+        except httpx.RequestError as exc:
             raise CoinGeckoAPIError(f"Network error: {exc}") from exc
         except ValueError as exc:
             raise CoinGeckoAPIError("Invalid response") from exc
@@ -118,7 +117,7 @@ class CoinGeckoClient:
             self._endpoints.ping_endpoint, body=None, query_params=None
         )
 
-    async def get_coins_price_py_id(self, coin_price_data: CoinPriceByIdParams):
+    async def get_coins_price_by_id(self, coin_price_data: CoinPriceByIdParams):
         response = await self._request(
             self._endpoints.coin_price_by_id_endpoint,
             body=None,

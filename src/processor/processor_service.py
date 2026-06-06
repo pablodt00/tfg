@@ -68,7 +68,7 @@ class ProcessorService:
                     )
                     last_price = db_coin.last_price
                     price_1_min_change_percent = round(
-                        ((coin_price - last_price) / coin_price) * 100, 2
+                        ((coin_price - last_price) / last_price) * 100, 2
                     )
                     db_coin.price_1_min_change_percent = price_1_min_change_percent
                     db_coin.last_price = coin_price
@@ -79,7 +79,7 @@ class ProcessorService:
                         )
                         base_price = db_coin.base_price
                         price_5_min_change_percent = round(
-                            ((coin_price - base_price) / coin_price) * 100, 2
+                            ((coin_price - base_price) / base_price) * 100, 2
                         )
                         db_coin.price_5_min_change_percent = price_5_min_change_percent
                         db_coin.base_price = coin_price
@@ -106,29 +106,20 @@ class ProcessorService:
 
                 for alert in alerts:
                     if alert.condition == AlertConditionEnum.GREATER_THAN_OR_EQUAL:
-                        if coin_price >= alert.amount:
-                            self.logger.info("Alert triggered for coin", coin=coin)
-                            await self.send_alert(
-                                coin=coin,
-                                coin_price=coin_price,
-                                condition=alert.condition.value,
-                                threshold=alert.amount,
-                                email=alert.user_email,
-                            )
-                            alert.triggered = True
-                            await self.alert_repository.update(
-                                session=session, model=alert, entity_id=alert.id
-                            )
+                        condition_met = coin_price >= alert.amount
                     else:
-                        if coin_price <= alert.amount:
-                            self.logger.info("Alert triggered for coin", coin=coin)
-                            await self.send_alert(
-                                coin=coin,
-                                coin_price=coin_price,
-                                condition=alert.condition.value,
-                                threshold=alert.amount,
-                                email=alert.user_email,
-                            )
+                        condition_met = coin_price <= alert.amount
+
+                    if condition_met:
+                        self.logger.info("Alert triggered for coin", coin=coin)
+                        sent = await self.send_alert(
+                            coin=coin,
+                            coin_price=coin_price,
+                            condition=alert.condition.value,
+                            threshold=alert.amount,
+                            email=alert.user_email,
+                        )
+                        if sent:
                             alert.triggered = True
                             await self.alert_repository.update(
                                 session=session, model=alert, entity_id=alert.id
@@ -141,17 +132,19 @@ class ProcessorService:
 
     async def send_alert(
         self, coin: str, coin_price: float, condition: str, threshold: float, email: str
-    ):
+    ) -> bool:
         start = time.perf_counter()
-        await self.email_service.send_alert_email(
+        sent = await self.email_service.send_alert_email(
             to_email=email,
             coin=coin,
             price=coin_price,
             condition=condition,
             threshold=threshold,
         )
-        alert_delivery_time_seconds.observe(time.perf_counter() - start)
-        alerts_sent_total.labels(coin=coin, condition=condition).inc()
+        if sent:
+            alert_delivery_time_seconds.observe(time.perf_counter() - start)
+            alerts_sent_total.labels(coin=coin, condition=condition).inc()
+        return sent
 
     async def process_data(self, data: dict):
         start = time.perf_counter()
