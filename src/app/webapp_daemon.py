@@ -28,8 +28,8 @@ COIN_EMOJI = {
     "Ethereum": "Ξ",
     "Tether": "₮",
     "XRP": "✕",
-    "BNB": "🔶",
-    "USD Coin": "💵",
+    "BNB": "B",
+    "USD Coin": "$",
     "Solana": "◎",
     "Dogecoin": "Ð",
     "Cardano": "₳",
@@ -126,7 +126,7 @@ def _change_color(value_str: str) -> str:
 
 st.set_page_config(
     page_title="Crypto Alerts Dashboard",
-    page_icon="📈",
+    page_icon="₿",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -189,14 +189,14 @@ st.markdown(
 st.markdown(
     """
     <div class="dashboard-header">
-        <h1>📈 Crypto Alerts Dashboard</h1>
+        <h1>Crypto Alerts Dashboard</h1>
         <p>Real-time cryptocurrency prices &amp; custom price alerts</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-tab1, tab2 = st.tabs(["📊  Prices", "🔔  Set Alert"])
+tab1, tab2 = st.tabs(["Prices", "Set Alert"])
 
 with tab1:
     _, main_col, _ = st.columns([1, 10, 1])
@@ -225,7 +225,7 @@ with tab1:
                 delta = coin["price_1_min_change_percent"]
                 with col:
                     st.metric(
-                        label=f"{COIN_EMOJI.get(name, '🪙')} {name}",
+                        label=f"{COIN_EMOJI.get(name, '')} {name}".strip(),
                         value=f"€{price:,.2f}" if price is not None else "—",
                         delta=f"{delta:+.2f}% 1m" if delta is not None else None,
                     )
@@ -242,7 +242,7 @@ with tab1:
             for coin in raw_data:
                 name = symbol_to_name.get(coin["coin"], coin["coin"].upper())
                 rows.append({
-                    "Coin": f"{COIN_EMOJI.get(name, '🪙')} {name}",
+                    "Coin": f"{COIN_EMOJI.get(name, '')} {name}".strip(),
                     "Price (EUR)": (
                         coin["last_price"]
                         if isinstance(coin["last_price"], (int, float))
@@ -274,7 +274,7 @@ with tab1:
         else:
             coins_data = fetch_coins_data()
             st.warning(
-                "⚠️ Live data unavailable — showing cached/default values."
+                "Live data unavailable — showing cached/default values."
             )
             st.dataframe(coins_data, use_container_width=True)
 
@@ -290,14 +290,14 @@ with tab2:
             left, right = st.columns(2)
 
             with left:
-                email = st.text_input("📧 Email Address", placeholder="you@example.com")
+                email = st.text_input("Email Address", placeholder="you@example.com")
                 selected_coin = st.selectbox(
-                    "🪙 Cryptocurrency", list(COIN_NAME_TO_SYMBOL.keys())
+                    "Cryptocurrency", list(COIN_NAME_TO_SYMBOL.keys())
                 )
 
             with right:
                 operator = st.selectbox(
-                    "⚖️ Condition",
+                    "Condition",
                     [">=", "<="],
                     format_func=lambda x: (
                         "Price rises to or above  ≥"
@@ -306,7 +306,7 @@ with tab2:
                     ),
                 )
                 amount = st.number_input(
-                    "🎯 Target Price (EUR)",
+                    "Target Price (EUR)",
                     min_value=0.0,
                     step=1.0,
                     format="%.4f",
@@ -318,7 +318,7 @@ with tab2:
             btn_col, info_col = st.columns([1, 3])
             with btn_col:
                 submit = st.button(
-                    "🔔 Set Alert", use_container_width=True, type="primary"
+                    "Set Alert", use_container_width=True, type="primary"
                 )
             with info_col:
                 st.markdown(
@@ -338,8 +338,8 @@ with tab2:
                         email, selected_coin, operator_text, amount, default_logger
                     ):
                         st.success(
-                            f"✅ Alert created! You'll be notified at **{email}** when "
+                            f"Alert created. You'll be notified at **{email}** when "
                             f"**{selected_coin}** is **{operator} €{amount:,.4f}**"
                         )
                 else:
-                    st.warning("⚠️ Please fill in all fields before submitting.")
+                    st.warning("Please fill in all fields before submitting.")

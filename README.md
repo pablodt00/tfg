@@ -6,7 +6,7 @@ Este proyecto es un sistema distribuido para el monitoreo y análisis de criptom
 
 ## Estructura del Proyecto
 
-### 📁 `src/`
+### `src/`
 Contiene el código fuente de la aplicación, organizado en módulos:
 
 - **`api/`**: Daemon y servicio REST API para exponer endpoints HTTP
@@ -37,7 +37,7 @@ Contiene el código fuente de la aplicación, organizado en módulos:
   - `observability/`: Métricas de Prometheus y logging estructurado
   - `schemas/`: Esquemas de datos de base de datos
 
-### 📁 `kubernetes/`
+### `kubernetes/`
 Manifiestos de Kubernetes para el despliegue:
 - **Knative Services** (`*-daemon.yaml`): Servicios serverless con autoescalado
   - `api-daemon.yaml`: Servicio API REST
@@ -62,16 +62,16 @@ Manifiestos de Kubernetes para el despliegue:
   - `knative-dns.yaml`: Configuración DNS para Knative
   - `kind-config.yaml`: Configuración del cluster local
 
-### 📁 `tests/`
+### `tests/`
 Suite de tests unitarios organizados por módulo
 
-### 📁 `docker/`
+### `docker/`
 Configuración de Docker para desarrollo local:
 - `Dockerfile`: Imagen Docker de la aplicación
 - `docker-compose.yml`: Orquestación de servicios
 - `local.env`: Variables de entorno locales
 
-### 📁 `kubernetes/grafana-dashboards/`
+### `kubernetes/grafana-dashboards/`
 Dashboards de Grafana en formato JSON para monitorización:
 - `infrastructure.json`: Dashboard de infraestructura general
 - `api-daemon.json`: Métricas del servicio API
@@ -79,7 +79,7 @@ Dashboards de Grafana en formato JSON para monitorización:
 - `processor-daemon.json`: Métricas del procesador
 - `webapp-daemon.json`: Métricas de la aplicación web
 
-### 📁 `makefiles/`
+### `makefiles/`
 Makefiles modulares para diferentes componentes:
 - Gestión de daemons individuales (deploy, delete, logs, forward, status)
 - Configuración de Kafka y Knative Eventing
@@ -87,10 +87,10 @@ Makefiles modulares para diferentes componentes:
 - Configuración de monitoreo (Prometheus y Grafana)
 - Tareas de desarrollo y testing
 
-### 📁 `scripts/`
+### `scripts/`
 Scripts bash para ejecutar los diferentes daemons con `uvicorn`
 
-### 📁 `docs/`
+### `docs/`
 Documentación del proyecto:
 - Diagramas de arquitectura
 - Guías de configuración (ej: entorno Kubernetes con Kind)
