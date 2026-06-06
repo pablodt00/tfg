@@ -133,6 +133,27 @@ load-test-all: load-test-sustained load-test-spike load-test-events \
 # Helpers
 # ---------------------------------------------------------------------------
 
+load-test-up:
+	@echo "==> Desplegando mock de Resend en Kubernetes..."
+	kubectl apply -f kubernetes/mock-resend.yaml
+	kubectl rollout status deployment/mock-resend
+	kubectl patch configmap tfg-config --type merge \
+		-p '{"data":{"RESEND_BASE_URL":"http://mock-resend.default.svc.cluster.local:8025"}}'
+	kubectl patch service.serving.knative.dev/processor-service \
+		--type merge \
+		-p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"'"$$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}}}}}'
+	@echo "==> Mock de Resend activo. Los emails no se enviarán a Resend real."
+
+load-test-down:
+	@echo "==> Eliminando mock de Resend de Kubernetes..."
+	kubectl patch configmap tfg-config --type json \
+		-p '[{"op":"remove","path":"/data/RESEND_BASE_URL"}]' 2>/dev/null || true
+	kubectl delete -f kubernetes/mock-resend.yaml --ignore-not-found
+	kubectl patch service.serving.knative.dev/processor-service \
+		--type merge \
+		-p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"'"$$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}}}}}'
+	@echo "==> Mock eliminado. El processor-service volverá a usar Resend real."
+
 load-test-status:
 	@echo "==> Estado de los Knative Services:"
 	kubectl get ksvc
@@ -144,6 +165,7 @@ load-test-clean:
 	rm -rf $(REPORT_DIR)
 	mkdir -p $(REPORT_DIR)
 
-.PHONY: load-test-sustained load-test-spike load-test-coldstart load-test-events \
+.PHONY: load-test-up load-test-down \
+        load-test-sustained load-test-spike load-test-coldstart load-test-events \
         load-test-resilience load-test-scaling load-test-ui load-test-all \
         load-test-status load-test-kill-pod load-test-clean
