@@ -24,3 +24,6 @@ spec:
             - configMapRef:
                 name: tfg-config
           command: ["/srv/scripts/api_daemon.sh"]
+          resources:
+            limits:
+              memory: "512Mi"
