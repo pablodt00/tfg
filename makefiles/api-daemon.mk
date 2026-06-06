@@ -13,4 +13,13 @@ k8s-api-status:
 	kubectl get pods -l serving.knative.dev/service=api-daemon
 
 k8s-api-forward:
-	kubectl port-forward --address 0.0.0.0 deployment/api-daemon-00001-deployment 7654:7654
+	while true; do \
+		POD=$$(kubectl get pod -l serving.knative.dev/service=api-daemon --field-selector=status.phase=Running -o name | head -1); \
+		if [ -n "$$POD" ]; then \
+			echo "Forwarding $$POD 7654->7654"; \
+			kubectl port-forward --address 0.0.0.0 $$POD 7654:7654; \
+		else \
+			echo "No running pod found, retrying..."; \
+		fi; \
+		sleep 2; \
+	done
