@@ -1,4 +1,7 @@
+# pylint: disable=too-many-arguments, too-many-positional-arguments
 from unittest.mock import MagicMock, patch
+
+from processor.processor_daemon import execute
 
 
 @patch("processor.processor_daemon.build_processor_daemon")
@@ -12,8 +15,8 @@ def test_execute_builds_app(
     mock_settings_cls,
     mock_make_engine,
     mock_make_session_factory,
-    mock_coin_repo_cls,
-    mock_alert_repo_cls,
+    _mock_coin_repo_cls,
+    _mock_alert_repo_cls,
     mock_processor_service_cls,
     mock_build_processor_daemon,
 ):
@@ -23,8 +26,6 @@ def test_execute_builds_app(
 
     mock_app = MagicMock()
     mock_build_processor_daemon.return_value = mock_app
-
-    from processor.processor_daemon import execute
 
     result = execute()
 

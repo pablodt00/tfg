@@ -190,7 +190,8 @@ st.markdown(
     """
     <div class="dashboard-header">
         <h1>Panel de Alertas de Criptomonedas</h1>
-        <p>Precios de criptomonedas en tiempo real y alertas de precio personalizadas</p>
+        <p>Precios de criptomonedas en tiempo real
+        y alertas de precio personalizadas</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -204,7 +205,8 @@ with tab1:
         title_col, refresh_col = st.columns([8, 1])
         with title_col:
             st.markdown(
-                '<div class="section-title">Precios de criptomonedas en tiempo real (EUR)</div>',
+                '<div class="section-title">'
+                'Precios de criptomonedas en tiempo real (EUR)</div>',
                 unsafe_allow_html=True,
             )
         with refresh_col:
@@ -290,7 +292,9 @@ with tab2:
             left, right = st.columns(2)
 
             with left:
-                email = st.text_input("Correo electrónico", placeholder="usuario@ejemplo.com")
+                email = st.text_input(
+                    "Correo electrónico", placeholder="usuario@ejemplo.com"
+                )
                 selected_coin = st.selectbox(
                     "Criptomoneda", list(COIN_NAME_TO_SYMBOL.keys())
                 )
@@ -323,7 +327,8 @@ with tab2:
             with info_col:
                 st.markdown(
                     "<p style='color:#8892a4;font-size:0.85rem;margin-top:0.6rem'>"
-                    "Recibirás un correo electrónico cuando se cumpla la condición de precio.</p>",
+                    "Recibirás un correo electrónico cuando"
+                    " se cumpla la condición de precio.</p>",
                     unsafe_allow_html=True,
                 )
 
@@ -338,8 +343,11 @@ with tab2:
                         email, selected_coin, operator_text, amount, default_logger
                     ):
                         st.success(
-                            f"Alerta creada. Recibirás una notificación en **{email}** cuando "
+                            f"Alerta creada. Recibirás una notificación"
+                            f" en **{email}** cuando "
                             f"**{selected_coin}** sea **{operator} €{amount:,.4f}**"
                         )
                 else:
-                    st.warning("Por favor, rellena todos los campos antes de continuar.")
+                    st.warning(
+                        "Por favor, rellena todos los campos antes de continuar."
+                    )
