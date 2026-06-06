@@ -40,7 +40,7 @@ if __name__ == "__main__":
     uvicorn.run(
         app=f"api.{app_name}:execute",
         host="0.0.0.0",
-        port=8000,
+        port=7654,
         workers=1,
         factory=True,
     )
