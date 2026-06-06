@@ -21,12 +21,12 @@ ALERT_AMOUNTS = {
 
 def _random_alert_payload() -> dict:
     coin = random.choice(COINS)
-    low, high = ALERT_AMOUNTS[coin]
+    low, _ = ALERT_AMOUNTS[coin]
     return {
         "coin": coin,
-        "amount": round(random.uniform(low, high), 2),
-        "email": f"user{random.randint(1, 100)}@test.com",
-        "condition": random.choice(CONDITIONS),
+        "amount": round(low * 0.01, 6),
+        "email": "delivered@resend.dev",
+        "condition": "GREATER_THAN_OR_EQUAL",
     }
 
 
