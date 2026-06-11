@@ -1,0 +1,4 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,GET /health/ping,"gaierror(-3, 'Temporary failure in name resolution')",4,2026-06-07T01:40:58Z,2026-06-07T01:41:01Z
+POST,POST /alerts/add,"gaierror(-3, 'Temporary failure in name resolution')",2,2026-06-07T01:40:55Z,2026-06-07T01:40:59Z
+GET,GET /coins/coins,"gaierror(-3, 'Temporary failure in name resolution')",6,2026-06-07T01:40:56Z,2026-06-07T01:41:01Z
